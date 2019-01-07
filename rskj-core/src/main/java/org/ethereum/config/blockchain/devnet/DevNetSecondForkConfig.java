@@ -34,4 +34,9 @@ public class DevNetSecondForkConfig extends DevNetOrchid060Config {
     public boolean isRskipMultipleKeyFederateMembers() {
         return true;
     }
+
+    @Override
+    public boolean isRskipPrecompiledContracts() {
+        return true;
+    }
 }
