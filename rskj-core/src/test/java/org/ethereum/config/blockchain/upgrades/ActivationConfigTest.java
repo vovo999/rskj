@@ -51,7 +51,8 @@ public class ActivationConfigTest {
             "    rskip98: orchid,",
             "    rskip103: orchid060,",
             "    rskip120: secondFork,",
-            "    rskip123: secondFork",
+            "    rskip123: secondFork,",
+            "    rskipunitrie: secondFork",
             "}"
     ));
 

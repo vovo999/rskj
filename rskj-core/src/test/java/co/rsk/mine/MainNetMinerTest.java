@@ -2,7 +2,7 @@ package co.rsk.mine;
 
 import co.rsk.bitcoinj.core.NetworkParameters;
 import co.rsk.config.ConfigUtils;
-import co.rsk.config.TestSystemProperties;
+import co.rsk.config.RskSystemProperties;
 import co.rsk.core.BlockDifficulty;
 import co.rsk.core.DifficultyCalculator;
 import co.rsk.core.bc.BlockChainImpl;
@@ -16,6 +16,7 @@ import org.ethereum.config.BlockchainNetConfig;
 import org.ethereum.config.Constants;
 import org.ethereum.config.blockchain.upgrades.ActivationConfigsForTest;
 import org.ethereum.core.*;
+import org.ethereum.core.genesis.GenesisLoader;
 import org.ethereum.db.BlockStore;
 import org.ethereum.facade.EthereumImpl;
 import org.ethereum.util.RskTestFactory;
@@ -37,7 +38,7 @@ public class MainNetMinerTest {
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
-    private TestSystemProperties config;
+    private RskSystemProperties config;
     private TransactionPool transactionPool;
     private BlockStore blockStore;
     private NodeBlockProcessor blockProcessor;
@@ -47,9 +48,16 @@ public class MainNetMinerTest {
 
     @Before
     public void setup() {
-        config = new TestSystemProperties();
+        RskTestFactory factory = new RskTestFactory() {
+            @Override
+            public Genesis buildGenesis() {
+                Genesis genesis = GenesisLoader.loadGenesis("rsk-unittests.json", BigInteger.ZERO, true, true, true);
+                genesis.getHeader().setDifficulty(new BlockDifficulty(BigInteger.valueOf(300000)));
+                return genesis;
+            }
+        };
+        config = factory.getRskSystemProperties();
         config.setBlockchainConfig(new BlockchainNetConfig(Constants.mainnet(), ActivationConfigsForTest.all()));
-        RskTestFactory factory = new RskTestFactory(config);
         blockchain = factory.getBlockchain();
         transactionPool = factory.getTransactionPool();
         blockStore = factory.getBlockStore();
@@ -117,9 +125,6 @@ public class MainNetMinerTest {
         // medium minimum difficulty (this is not the mainnet nor the regnet)
         ////////////////////////////////////////////////////////////////////
         /* We need a low, but not too low, target */
-        Genesis gen = (Genesis) BlockChainImplTest.getGenesisBlock(blockchain);
-        gen.getHeader().setDifficulty(new BlockDifficulty(BigInteger.valueOf(300000)));
-        blockchain.setStatus(gen, gen.getCumulativeDifficulty());
 
         EthereumImpl ethereumImpl = Mockito.mock(EthereumImpl.class);
         Mockito.when(ethereumImpl.addNewMinedBlock(Mockito.any())).thenReturn(ImportResult.IMPORTED_BEST);
