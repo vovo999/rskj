@@ -318,6 +318,10 @@ public class RskSystemProperties extends SystemProperties {
         return new VmConfig(vmTrace(), vmTraceInitStorageLimit(), dumpBlock(), dumpStyle());
     }
 
+    public VmConfig getVmConfigWithTraceOn() {
+        return new VmConfig(true, 10000, dumpBlock(), dumpStyle());
+    }
+
     public long peerDiscoveryCleanPeriod() {
         return PD_DEFAULT_CLEAN_PERIOD;
     }

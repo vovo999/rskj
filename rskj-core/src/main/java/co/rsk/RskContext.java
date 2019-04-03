@@ -21,6 +21,7 @@ package co.rsk;
 import co.rsk.cli.CliArgs;
 import co.rsk.config.*;
 import co.rsk.core.*;
+import co.rsk.core.bc.BlockExecutorFactory;
 import co.rsk.core.bc.BlockValidatorImpl;
 import co.rsk.core.bc.TransactionPoolImpl;
 import co.rsk.crypto.Keccak256;
@@ -195,6 +196,7 @@ public class RskContext implements NodeBootstrapper {
     private MinerServer minerServer;
     private SolidityCompiler solidityCompiler;
     private BlocksBloomStore blocksBloomStore;
+    private BlockExecutorFactory blockExecutorFactory;
 
     public RskContext(String[] args) {
         this(new CliArgs.Parser<>(
@@ -273,6 +275,26 @@ public class RskContext implements NodeBootstrapper {
         }
 
         return repository;
+    }
+
+    public BlockExecutorFactory getBlockExecutorFactory() {
+        if (blockExecutorFactory == null) {
+            blockExecutorFactory = buildBlockExecutorFactory();
+        }
+
+        return blockExecutorFactory;
+    }
+
+    private BlockExecutorFactory buildBlockExecutorFactory() {
+        return new BlockExecutorFactory(
+                getRskSystemProperties(),
+                getRepository(),
+                getBlockStore(),
+                getReceiptStore(),
+                getProgramInvokeFactory(),
+                getCompositeEthereumListener(),
+                getStateRootHandler()
+                );
     }
 
     public org.ethereum.db.BlockStore getBlockStore() {
@@ -467,7 +489,7 @@ public class RskContext implements NodeBootstrapper {
 
     public DebugModule getDebugModule() {
         if (debugModule == null) {
-            debugModule = new DebugModuleImpl(getNodeMessageHandler());
+            debugModule = new DebugModuleImpl(getBlockStore(), getReceiptStore(), getNodeMessageHandler(), getBlockExecutorFactory());
         }
 
         return debugModule;

@@ -25,6 +25,7 @@ import co.rsk.core.RskAddress;
 import co.rsk.metrics.profilers.Metric;
 import co.rsk.metrics.profilers.Profiler;
 import co.rsk.metrics.profilers.ProfilerFactory;
+import co.rsk.crypto.Keccak256;
 import co.rsk.panic.PanicProcessor;
 import org.ethereum.config.BlockchainConfig;
 import org.ethereum.config.BlockchainNetConfig;
@@ -38,7 +39,9 @@ import org.ethereum.vm.program.Program;
 import org.ethereum.vm.program.ProgramResult;
 import org.ethereum.vm.program.invoke.ProgramInvoke;
 import org.ethereum.vm.program.invoke.ProgramInvokeFactory;
+import org.ethereum.vm.trace.FileProgramTraceProcessor;
 import org.ethereum.vm.trace.ProgramTrace;
+import org.ethereum.vm.trace.ProgramTraceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +55,6 @@ import static org.apache.commons.lang3.ArrayUtils.getLength;
 import static org.apache.commons.lang3.ArrayUtils.isEmpty;
 import static org.ethereum.util.BIUtil.*;
 import static org.ethereum.util.ByteUtil.EMPTY_BYTE_ARRAY;
-import static org.ethereum.vm.VMUtils.saveProgramTraceFile;
 
 /**
  * @author Roman Mandeleil
@@ -76,10 +78,7 @@ public class TransactionExecutor {
     private final BlockchainNetConfig netConfig;
     private final boolean playVm;
     private final boolean enableRemasc;
-    private final boolean vmTrace;
-    private final String databaseDir;
-    private final String vmTraceDir;
-    private final boolean vmTraceCompressed;
+    private final ProgramTraceProcessor programTraceProcessor;
     private String executionError = "";
     private final long gasUsedInTheBlock;
     private Coin paidFees;
@@ -108,7 +107,8 @@ public class TransactionExecutor {
     public TransactionExecutor(Transaction tx, int txindex, RskAddress coinbase, Repository track, BlockStore blockStore, ReceiptStore receiptStore,
                                BlockFactory blockFactory, ProgramInvokeFactory programInvokeFactory, Block executionBlock, EthereumListener listener, long gasUsedInTheBlock,
                                VmConfig vmConfig, BlockchainNetConfig blockchainConfig, boolean playVm, boolean remascEnabled,
-                               boolean vmTrace, PrecompiledContracts precompiledContracts, String databaseDir, String vmTraceDir, boolean vmTraceCompressed) {
+                               PrecompiledContracts precompiledContracts,
+                               ProgramTraceProcessor programTraceProcessor) {
         this.tx = tx;
         this.txindex = txindex;
         this.coinbase = coinbase;
@@ -126,12 +126,19 @@ public class TransactionExecutor {
         this.netConfig = blockchainConfig;
         this.playVm = playVm;
         this.enableRemasc = remascEnabled;
-        this.vmTrace = vmTrace;
-        this.databaseDir = databaseDir;
-        this.vmTraceDir = vmTraceDir;
-        this.vmTraceCompressed = vmTraceCompressed;
+        this.programTraceProcessor = programTraceProcessor;
     }
 
+    public TransactionExecutor(Transaction tx, int txindex, RskAddress coinbase, Repository track, BlockStore blockStore, ReceiptStore receiptStore,
+                               ProgramInvokeFactory programInvokeFactory, Block executionBlock, EthereumListener listener, long gasUsedInTheBlock,
+                               VmConfig vmConfig, BlockchainNetConfig blockchainConfig, boolean playVm, boolean remascEnabled,
+                               boolean vmTrace, PrecompiledContracts precompiledContracts, String databaseDir, String vmTraceDir, boolean vmTraceCompressed) {
+        this(tx, txindex, coinbase, track, blockStore, receiptStore,
+            programInvokeFactory, executionBlock, listener, gasUsedInTheBlock,
+            vmConfig, blockchainConfig, playVm, remascEnabled,
+            precompiledContracts,
+            new FileProgramTraceProcessor(vmTrace, databaseDir, vmTraceDir, vmTraceCompressed));
+    }
 
     /**
      * Do all the basic validation, if the executor
@@ -526,13 +533,13 @@ public class TransactionExecutor {
 
         logger.trace("tx listener done");
 
-        if (vmTrace && program != null) {
+        if (this.programTraceProcessor.enabled() && program != null) {
             ProgramTrace trace = program.getTrace().result(result.getHReturn()).error(result.getException());
-            String txHash = tx.getHash().toHexString();
+            Keccak256 txHash = tx.getHash();
             try {
-                saveProgramTraceFile(txHash, trace, databaseDir, vmTraceDir, vmTraceCompressed);
+                this.programTraceProcessor.processProgramTrace(trace, txHash);
                 if (listener != null) {
-                    listener.onVMTraceCreated(txHash, trace);
+                    listener.onVMTraceCreated(txHash.toHexString(), trace);
                 }
             } catch (IOException e) {
                 String errorMessage = String.format("Cannot write trace to file: %s", e.getMessage());
