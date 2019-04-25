@@ -36,6 +36,7 @@ public class BlockstoreBlockPlayer {
         this.sourceDir = sourceDir;
         this.targetBlockchain = objects.getBlockchain();
         this.blockNumber = targetBlockchain.getBestBlock().getNumber() + 1;
+        objects.getBlockStore().setUseSnappy();
     }
 
     private void connectBlocks() {
@@ -65,11 +66,13 @@ public class BlockstoreBlockPlayer {
     }
 
     public static void main(String[] args) {
-        if (args.length == 0) {
+        /*if (args.length == 0) {
             System.out.println("usage: BlockstoreBlockPlayer [<node cli args>] <block store source dir>");
             System.exit(0);
             return;
-        }
+        }*/
+
+        args = new String[] {"-base-path", "/home/julian/.rsk/mainnet-snappy-test", "/home/julian/workspace/DB-Mainnet/database/mainnet"};
 
         String[] nodeCliArgs = Arrays.copyOf(args, args.length - 1);
         RskContext objects = new RskContext(nodeCliArgs);

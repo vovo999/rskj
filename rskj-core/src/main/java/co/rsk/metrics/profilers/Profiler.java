@@ -52,4 +52,11 @@ public interface Profiler {
      * @param metric Metric instance that needs to be finalized
      */
     void stop(Metric metric);
+
+    /**
+     * Indicates that a new block is about to be profiled
+     * @param blockId id of the block about to be profiled
+     * @param trxQty quantity of transactions included in the block
+     */
+    void newBlock(long blockId, int trxQty);
 }

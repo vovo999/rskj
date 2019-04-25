@@ -36,6 +36,7 @@ import org.mapdb.DataIO;
 import org.mapdb.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xerial.snappy.Snappy;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -58,6 +59,7 @@ public class IndexedBlockStore implements BlockStore {
     private final Map<Long, List<BlockInfo>> index;
     private final DB indexDB;
     private final KeyValueDataSource blocks;
+    private boolean useSnappy = false;
 
     public IndexedBlockStore(Map<Long, List<BlockInfo>> index, KeyValueDataSource blocks, DB indexDB) {
         this.index = index;
@@ -176,7 +178,15 @@ public class IndexedBlockStore implements BlockStore {
         blockInfo.setMainChain(mainChain);
 
         if (blocks.get(block.getHash().getBytes()) == null) {
-            blocks.put(block.getHash().getBytes(), block.getEncoded());
+            if (useSnappy){
+                try {
+                    blocks.put(block.getHash().getBytes(), Snappy.compress(block.getEncoded()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                blocks.put(block.getHash().getBytes(), block.getEncoded());
+            }
         }
         index.put(block.getNumber(), blockInfos);
         blockCache.addBlock(block);
@@ -231,7 +241,7 @@ public class IndexedBlockStore implements BlockStore {
             return null;
         }
 
-        blockCache.addBlock(block);
+        //blockCache.addBlock(block);
         remascCache.put(block.getHash(), getSiblingsFromBlock(block));
         return block;
     }
@@ -243,7 +253,14 @@ public class IndexedBlockStore implements BlockStore {
             return block;
         }
 
-        byte[] blockRlp = blocks.get(hash);
+        byte[] blockRlp = new byte[0];
+
+        try {
+            blockRlp = useSnappy ?  Snappy.uncompress(blocks.get(hash))  :  blocks.get(hash);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (blockRlp == null) {
             return null;
         }
@@ -496,6 +513,11 @@ public class IndexedBlockStore implements BlockStore {
         }
 
         return null;
+    }
+
+    public BlockStore setUseSnappy(){
+        useSnappy = true;
+        return this;
     }
 
     @Override
