@@ -62,4 +62,9 @@ public interface BlockchainConfig {
     boolean isRskip94();
 
     boolean isRskip98();
+
+    /**
+     * @see <a href="https://github.com/rsksmart/RSKIPs/blob/master/IPs/RSKIP110.md">RSKIP 110</a>
+     */
+    boolean isRskip110();
 }

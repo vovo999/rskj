@@ -70,6 +70,11 @@ public class DevNetOrchidConfig extends DevNetGenesisConfig {
         return true;
     }
 
+    @Override
+    public boolean isRskip110() {
+        return true;
+    }
+
     //RSKIP97
     @Override
     public BlockDifficulty calcDifficulty(BlockHeader curBlock, BlockHeader parent) {

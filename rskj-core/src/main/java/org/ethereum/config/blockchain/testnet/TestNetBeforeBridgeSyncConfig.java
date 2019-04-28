@@ -122,6 +122,11 @@ public class TestNetBeforeBridgeSyncConfig extends GenesisConfig {
         return true;
     }
 
+    @Override
+    public boolean isRskip110() {
+        return true;
+    }
+
     @Override //Rskip97
     public BlockDifficulty calcDifficulty(BlockHeader curBlock, BlockHeader parent) {
         return getBlockDifficulty(curBlock, parent, getConstants());
