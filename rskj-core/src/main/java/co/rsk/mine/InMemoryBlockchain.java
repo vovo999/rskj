@@ -27,10 +27,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryBlockchain {
-
-    private static final int STORE_SIZE = 448;
-
     private final Object readWriteLock = new Object();
+
+    private final int height;
 
     private Blockchain blockchain;
 
@@ -42,12 +41,13 @@ public class InMemoryBlockchain {
     @GuardedBy("readWriteLock")
     private Map<Long, List<Block>> blocksByNumber;
 
-    public InMemoryBlockchain(Blockchain blockchain) {
+    InMemoryBlockchain(Blockchain blockchain, int height) {
+        this.height = height;
         this.blockchain = blockchain;
         this.bestBlock = blockchain.getBestBlock();
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
-        fillBlockStoreWithMissingBlocks(bestBlock, STORE_SIZE);
+        fillBlockStoreWithMissingBlocks(bestBlock, height);
     }
 
     public synchronized void add(Block blockToAdd) {
@@ -60,7 +60,7 @@ public class InMemoryBlockchain {
             // there was at least one block at the level of blockToAdd
             if (!blocksByHash.containsKey(blockToAdd.getParentHash())) {
                 fillBlockStoreWithMissingBlocks(blockchain.getBlockByHash(blockToAdd.getParentHash().getBytes()),
-                        STORE_SIZE - 1);
+                        height - 1);
             }
 
             deleteEntriesOutOfBoundaries();
@@ -72,8 +72,11 @@ public class InMemoryBlockchain {
 
         synchronized (readWriteLock){
             Block currentBlock = bestBlock;
-            for(int i = 0; i < STORE_SIZE; i++) {
+            for(int i = 0; i < height; i++) {
                 resultBlockchain.add(currentBlock);
+                if(currentBlock.isGenesis()) {
+                    break;
+                }
                 currentBlock = blocksByHash.get(currentBlock.getParentHash());
             }
         }
@@ -83,10 +86,13 @@ public class InMemoryBlockchain {
 
     private void fillBlockStoreWithMissingBlocks(Block bestBlock, int numberOfBlocksToFill) {
         Block currentBlock = bestBlock;
-        for(int i=0; i < numberOfBlocksToFill; i++) {
+        for(int i = 0; i < numberOfBlocksToFill; i++) {
             blocksByHash.put(currentBlock.getHash(), currentBlock);
             addToBlockByNumberMap(currentBlock);
-            currentBlock = blockchain.getBlockByHash(bestBlock.getParentHash().getBytes());
+            if(currentBlock.isGenesis()) {
+                break;
+            }
+            currentBlock = blockchain.getBlockByHash(currentBlock.getParentHash().getBytes());
         }
     }
 
@@ -100,7 +106,7 @@ public class InMemoryBlockchain {
     }
 
     private void deleteEntriesOutOfBoundaries() {
-        long blocksHeightToDelete = bestBlock.getNumber() - STORE_SIZE;
+        long blocksHeightToDelete = bestBlock.getNumber() - height;
         if(blocksHeightToDelete > 0) {
             blocksByNumber.get(blocksHeightToDelete).forEach(blockToDelete -> blocksByHash.remove(blockToDelete.getHash()));
             blocksByNumber.remove(blocksHeightToDelete);
