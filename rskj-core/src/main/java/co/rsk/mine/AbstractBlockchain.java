@@ -26,7 +26,7 @@ import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class InMemoryBlockchain {
+public class AbstractBlockchain {
     private final Object readWriteLock = new Object();
 
     private final int height;
@@ -41,10 +41,10 @@ public class InMemoryBlockchain {
     @GuardedBy("readWriteLock")
     private Map<Long, List<Block>> blocksByNumber;
 
-    InMemoryBlockchain(Blockchain blockchain, int height) {
+    AbstractBlockchain(Blockchain realBlockchain, int height) {
         this.height = height;
-        this.blockchain = blockchain;
-        this.bestBlock = blockchain.getBestBlock();
+        this.blockchain = realBlockchain;
+        this.bestBlock = realBlockchain.getBestBlock();
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
         fillBlockStoreWithMissingBlocks(bestBlock, height);
