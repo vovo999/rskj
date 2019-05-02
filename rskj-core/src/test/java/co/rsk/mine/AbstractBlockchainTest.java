@@ -88,15 +88,81 @@ public class AbstractBlockchainTest {
         assertThat(result.size(), is(6));
     }
 
+    /**
+     * Blockchain has blocks A (genesis) -> B -> C (best block)
+     * A new block D has been added to the real blockchain triggering an add on the abstract blockchain
+     * After the add, abstract blockchain must be A (genesis) -> B -> C -> D (best block)
+     */
+    @Test
+    public void addBlockToTheTipOfTheBlockchain() {
+        Blockchain realBlockchain = createBlockchain(3);
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+
+        Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
+        testBlockchain.add(newBestBlockD);
+
+        List<Block> result = testBlockchain.get();
+
+        assertThat(result.size(), is(4));
+        assertThat(result.get(0).getNumber(), is(3L));
+        assertThat(result.get(0).getHash(), is(newBestBlockD.getHash()));
+    }
+
+    /**
+     * Blockchain has blocks A (genesis) -> B -> C (best block)
+     * A new block B' has been added to the real blockchain triggering an add on the abstract blockchain
+     * After the add, abstract blockchain must be A (genesis) -> B'(best block)
+     */
+    @Test
+    public void addNewBestBlockAtLowerHeight() {
+        Blockchain realBlockchain = createBlockchain(3);
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+
+        Block newBestBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
+        testBlockchain.add(newBestBlockB);
+
+        List<Block> result = testBlockchain.get();
+
+        assertThat(result.size(), is(2));
+        assertThat(result.get(0).getNumber(), is(1L));
+        assertThat(result.get(0).getHash(), is(newBestBlockB.getHash()));
+    }
+
+    /**
+     * Blockchain has blocks A (genesis) -> B -> C (best block)
+     * A new block C' has been added to the real blockchain triggering an add on the abstract blockchain
+     * After the add, abstract blockchain must be  A (genesis) -> B' -> C' (best block)
+     */
+    @Test
+    public void addNewBestBlockAndItsBranchToTheTipOfTheBlockchain() {
+        Blockchain realBlockchain = createBlockchain(3);
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+
+        Block newBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
+        when(realBlockchain.getBlockByHash(newBlockB.getHash().getBytes())).thenReturn(newBlockB);
+        when(realBlockchain.getBlockByNumber(1L)).thenReturn(newBlockB);
+
+        Block newBestBlockC = createBlock(2, newBlockB.getHash());
+        testBlockchain.add(newBestBlockC);
+
+        List<Block> result = testBlockchain.get();
+
+        assertThat(result.size(), is(3));
+        assertThat(result.get(0).getNumber(), is(2L));
+        assertThat(result.get(0).getHash(), is(newBestBlockC.getHash()));
+    }
+
     private Blockchain createBlockchain(int height) {
         Blockchain blockchain = mock(Blockchain.class);
 
         Block previousBlock = createGenesisBlock();
         when(blockchain.getBlockByHash(previousBlock.getHash().getBytes())).thenReturn(previousBlock);
+        when(blockchain.getBlockByNumber(0L)).thenReturn(previousBlock);
 
         for(long i = 1; i < height; i++) {
             Block block = createBlock(i, previousBlock.getHash());
             when(blockchain.getBlockByHash(block.getHash().getBytes())).thenReturn(block);
+            when(blockchain.getBlockByNumber(block.getNumber())).thenReturn(block);
 
             if(i == height - 1) {
                 when(blockchain.getBestBlock()).thenReturn(block);
