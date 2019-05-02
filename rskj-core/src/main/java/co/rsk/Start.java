@@ -17,8 +17,12 @@
  */
 package co.rsk;
 
+import co.rsk.cli.migration.UnitrieMigrationTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * The entrypoint for the RSK full node
@@ -28,6 +32,23 @@ public class Start {
 
     public static void main(String[] args) {
         RskContext ctx = new RskContext(args);
+        // we need to check before the data source is init'ed
+        if (!Files.exists(Paths.get(ctx.getRskSystemProperties().databaseDir(), "unitrie"))) {
+            UnitrieMigrationTool unitrieMigrationTool = new UnitrieMigrationTool(
+                    ctx.getRskSystemProperties().databaseDir(),
+                    ctx.getBlockStore(),
+                    ctx.getRepository(),
+                    ctx.getStateRootHandler(),
+                    ctx.getTrieConverter()
+            );
+            if (unitrieMigrationTool.canMigrate()) {
+                unitrieMigrationTool.migrate();
+            } else {
+                logger.error("Reset database or continue syncing with previous version");
+                System.exit(1);
+            }
+        }
+
         NodeRunner runner = ctx.getNodeRunner();
         try {
             runner.run();

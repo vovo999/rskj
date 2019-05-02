@@ -29,6 +29,7 @@ import org.ethereum.core.Block;
 import org.ethereum.core.BlockFactory;
 import org.ethereum.datasource.KeyValueDataSource;
 import org.ethereum.db.BlockStore;
+import org.ethereum.db.MutableRepository;
 import org.ethereum.db.TrieKeyMapper;
 import org.ethereum.vm.DataWord;
 
@@ -44,14 +45,18 @@ public class UnitrieComparator {
         int blockToMigrate = 800613;
 
         TrieStore migratedUnitrieStore = new TrieStoreImpl(RskContext.makeDataSource("unitrie-mainnet", unitrieMigratedDatabase));
-        UnitrieMigrationTool migrationTool = new UnitrieMigrationTool(orchidDatabase);
-        byte[] migratedUnitrieRoot = migrationTool.migrateRepository(blockToMigrate, migratedUnitrieStore);
-//        byte[] migratedUnitrieRoot = Hex.decode("3fe6f64b18f32c7f5ba75ff5ddc8171372fee62dda9900d6cdf205022a05a7ec");
-        Trie migratedUnitrie = migratedUnitrieStore.retrieve(migratedUnitrieRoot);
-
+        BlockStore unitrieReplayedBlockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), unitrieReplayedDatabase);
+        TrieConverter trieConverter = new TrieConverter();
+        UnitrieMigrationTool migrationTool = new UnitrieMigrationTool(
+                orchidDatabase,
+                RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), orchidDatabase),
+                new MutableRepository(new Trie(migratedUnitrieStore)),
+                null, // we don't call any method requiring this object
+                trieConverter
+        );
+        Trie migratedUnitrie = migrationTool.migrateState(migrationTool.getBlockToMigrate());
 
         KeyValueDataSource stateRootTranslations = RskContext.makeDataSource("stateRoots", unitrieReplayedDatabase);
-        BlockStore unitrieReplayedBlockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), unitrieReplayedDatabase);
         Block migratedBlock = unitrieReplayedBlockStore.getChainBlockByNumber(blockToMigrate);
         TrieStore replayedUnitrieStore = new TrieStoreImpl(RskContext.makeDataSource("state", unitrieReplayedDatabase));
         byte[] blockStateRoot = migratedBlock.getStateRoot();
@@ -65,14 +70,13 @@ public class UnitrieComparator {
             migratedUnitrie = migratedUnitrie.put(difference.getNodeKey().encode(), difference.getNode().getValue());
         }
 
-        TrieConverter trieConverter = new TrieConverter();
         byte[] unitrieConvertedStateRoot = trieConverter.getOrchidAccountTrieRoot(migratedUnitrie);
         if (Arrays.equals(blockStateRoot, unitrieConvertedStateRoot)) {
             System.out.println("aaaaaaah");
         } else {
             System.out.printf("\nOrchid state root:\t\t%s\nConverted Unitrie root:\t%s\nUnitrie state root:\t %s\n",
                     Hex.toHexString(blockStateRoot),
-                    Hex.toHexString(migratedUnitrieRoot),
+                    migratedUnitrie.getHash(),
                     Hex.toHexString(unitrieConvertedStateRoot)
             );
         }

@@ -21,22 +21,18 @@ package co.rsk.cli.migration;
 import co.rsk.RskContext;
 import co.rsk.core.RskAddress;
 import co.rsk.crypto.Keccak256;
+import co.rsk.db.StateRootHandler;
 import co.rsk.remasc.RemascTransaction;
 import co.rsk.trie.*;
 import org.bouncycastle.util.encoders.Hex;
-import org.ethereum.config.SystemProperties;
-import org.ethereum.config.net.MainNetConfig;
-import org.ethereum.config.net.TestNetConfig;
 import org.ethereum.core.AccountState;
 import org.ethereum.core.Block;
-import org.ethereum.core.BlockFactory;
 import org.ethereum.core.Repository;
 import org.ethereum.crypto.Keccak256Helper;
 import org.ethereum.datasource.HashMapDB;
 import org.ethereum.datasource.KeyValueDataSource;
 import org.ethereum.db.BlockStore;
 import org.ethereum.db.ByteArrayWrapper;
-import org.ethereum.db.MutableRepository;
 import org.ethereum.util.*;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.PrecompiledContracts;
@@ -46,18 +42,23 @@ import java.util.stream.Collectors;
 
 import static org.ethereum.crypto.HashUtil.EMPTY_TRIE_HASH;
 
+/**
+ * This is a one-time tool and should be removed after SecondFork (TBD) fork activation
+ */
 public class UnitrieMigrationTool {
 
     private final KeyValueDataSource orchidContractDetailsDataStore;
     private final KeyValueDataSource orchidContractsStorage;
     private final TrieStore orchidContractsTrieStore;
-    private final BlockStore blockStore;
     private final TrieStore orchidAccountsTrieStore;
-    private final String orchidDatabase;
+    private final String databaseDir;
     private final Map<RskAddress, TrieStore> contractStoreCache = new HashMap<>();
     private final Map<ByteArrayWrapper, RskAddress> addressHashes;
     private final TrieConverter trieConverter;
     private final Map<ByteArrayWrapper, byte[]> keccak256Cache;
+    private final BlockStore blockStore;
+    private final Repository unitrieRepository;
+    private final StateRootHandler stateRootHandler;
 
     public static void main(String[] args) {
 //        UnitrieMigrationTool migrationTool = new UnitrieMigrationTool("/Users/diegoll/Documents/databases/mainnet-800k");
@@ -68,39 +69,57 @@ public class UnitrieMigrationTool {
         stateRootTranslations.flush();
     }
 
-    public UnitrieMigrationTool(String orchidDatabase) {
-        this.orchidDatabase = orchidDatabase;
-        this.orchidContractDetailsDataStore = RskContext.makeDataSource("details", orchidDatabase);
-        this.orchidContractsStorage = RskContext.makeDataSource("contracts-storage", orchidDatabase);
+    public UnitrieMigrationTool(String databaseDir, BlockStore blockStore, Repository unitrieRepository, StateRootHandler stateRootHandler, TrieConverter trieConverter) {
+        this.databaseDir = databaseDir;
+        this.blockStore = blockStore;
+        this.unitrieRepository = unitrieRepository;
+        this.stateRootHandler = stateRootHandler;
+        this.trieConverter = trieConverter;
+
+        this.orchidContractDetailsDataStore = RskContext.makeDataSource("details", databaseDir);
+        this.orchidContractsStorage = RskContext.makeDataSource("contracts-storage", databaseDir);
         this.orchidContractsTrieStore = new CachedTrieStore(new TrieStoreImpl(orchidContractsStorage));
-        this.blockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), orchidDatabase);
-        this.orchidAccountsTrieStore = new CachedTrieStore(new TrieStoreImpl(RskContext.makeDataSource("state", orchidDatabase)));
-        this.trieConverter = new TrieConverter();
+        this.orchidAccountsTrieStore = new CachedTrieStore(new TrieStoreImpl(RskContext.makeDataSource("state", databaseDir)));
         this.keccak256Cache = new HashMap<>();
         this.addressHashes = orchidContractDetailsDataStore.keys().stream()
                 .filter(accountAddress -> accountAddress.length == 20)
                 .collect(
-                    Collectors.toMap(accountAddress -> ByteUtil.wrap(Keccak256Helper.keccak256(accountAddress)),
-                    RskAddress::new
-                )
-            );
+                        Collectors.toMap(accountAddress -> ByteUtil.wrap(Keccak256Helper.keccak256(accountAddress)),
+                                RskAddress::new
+                        )
+                );
         this.addressHashes.put(ByteUtil.wrap(Keccak256Helper.keccak256(PrecompiledContracts.REMASC_ADDR.getBytes())), PrecompiledContracts.REMASC_ADDR);
         this.addressHashes.put(ByteUtil.wrap(Keccak256Helper.keccak256(RemascTransaction.REMASC_ADDRESS.getBytes())), RemascTransaction.REMASC_ADDRESS);
     }
 
-    public byte[] migrateRepository(long blockToMigrate, TrieStore unitrieStoreDestination) {
-        MutableRepository unitrieRepository = new MutableRepository(new Trie(unitrieStoreDestination));
-        if (blockToMigrate > blockStore.getMaxNumber()) {
-            throw new IllegalArgumentException(String.format("Unable to migrate blocks greater than %d", blockStore.getMaxNumber()));
-        }
-        Block currentBlock = blockStore.getChainBlockByNumber(blockToMigrate);
-        byte[] orchidStateRoot = currentBlock.getStateRoot();
-        System.out.printf("====== %07d (%s) =======\n", blockToMigrate, Hex.toHexString(orchidStateRoot));
+    public boolean canMigrate() {
+        return getBlockToMigrate() != null;
+    }
+
+    public void migrate() {
+        Block blockToMigrate = getBlockToMigrate();
+        Trie migratedTrie = migrateState(blockToMigrate);
+        unitrieRepository.setupContract(PrecompiledContracts.ECRECOVER_ADDR);
+        unitrieRepository.flush();
+
+        stateRootHandler.register(
+                blockToMigrate.getHeader(),
+                migratedTrie
+        );
+    }
+
+    public Block getBlockToMigrate() {
+        return blockStore.getChainBlockByNumber(800613);
+    }
+
+    public Trie migrateState(Block blockToMigrate) {
+        byte[] orchidStateRoot = blockToMigrate.getStateRoot();
+        System.out.printf("====== %07d (%s) =======\n", blockToMigrate.getNumber(), Hex.toHexString(orchidStateRoot));
         Trie orchidAccountsTrie = orchidAccountsTrieStore.retrieve(orchidStateRoot);
         if (!Arrays.equals(orchidStateRoot, orchidAccountsTrie.getHashOrchid(true).getBytes())) {
-            throw new IllegalStateException(String.format("Stored account state is not consistent with the expected root (%s) for block %d", Hex.toHexString(orchidStateRoot), blockToMigrate));
+            throw new IllegalStateException(String.format("Stored account state is not consistent with the expected root (%s) for block %d", Hex.toHexString(orchidStateRoot), blockToMigrate.getNumber()));
         }
-        buildPartialUnitrie(orchidAccountsTrie, orchidContractDetailsDataStore, unitrieRepository);
+        buildPartialUnitrie(orchidAccountsTrie, unitrieRepository);
 
         byte[] lastStateRoot = unitrieRepository.getRoot();
         byte[] orchidMigratedStateRoot = trieConverter.getOrchidAccountTrieRoot(unitrieRepository.getMutableTrie().getTrie());
@@ -114,10 +133,11 @@ public class UnitrieMigrationTool {
         } else {
             System.out.println("Matched state root");
         }
-        return lastStateRoot;
+
+        return unitrieRepository.getMutableTrie().getTrie();
     }
 
-    private void buildPartialUnitrie(Trie orchidAccountsTrie, KeyValueDataSource detailsDataStore, Repository repository) {
+    private void buildPartialUnitrie(Trie orchidAccountsTrie, Repository repository) {
         int accountsToLog = 500;
         int accountsCounter = 0;
         System.out.printf("(x = %d accounts): ", accountsToLog);
@@ -133,7 +153,7 @@ public class UnitrieMigrationTool {
                 RskAddress accountAddress = addressHashes.get(ByteUtil.wrap(hashedAddress));
                 repository.createAccount(accountAddress);
                 repository.updateAccountState(accountAddress, accountState);
-                byte[] contractData = detailsDataStore.get(accountAddress.getBytes());
+                byte[] contractData = orchidContractDetailsDataStore.get(accountAddress.getBytes());
                 byte[] codeHash = oldAccountState.getCodeHash();
                 byte[] accountStateRoot = oldAccountState.getStateRoot();
                 if (contractData != null) {
@@ -180,7 +200,7 @@ public class UnitrieMigrationTool {
                 if (contractStorageTrie == null) {
                     TrieStore contractTrieStore = contractStoreCache.computeIfAbsent(
                             contractAddress,
-                            address -> new CachedTrieStore(new TrieStoreImpl(RskContext.makeDataSource("details-storage/" + address, orchidDatabase)))
+                            address -> new CachedTrieStore(new TrieStoreImpl(RskContext.makeDataSource("details-storage/" + address, databaseDir)))
                     );
                     contractStorageTrie = contractTrieStore.retrieve(root);
                     if (contractStorageTrie == null) {
@@ -247,8 +267,6 @@ public class UnitrieMigrationTool {
 
     /**
      * Counts all nodes with value and checks it's equals to accountsCounter
-     * @param currentTrie
-     * @param accountsCounter
      */
     private void allValuesProcessed(Trie currentTrie, int expectedCount) {
         int valueCounter = 0;
