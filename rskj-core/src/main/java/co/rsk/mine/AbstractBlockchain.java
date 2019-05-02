@@ -27,7 +27,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AbstractBlockchain {
-    private final Object readWriteLock = new Object();
+    private final Object internalsBlockStoresReadWriteLock = new Object();
 
     private final int height;
 
@@ -35,10 +35,10 @@ public class AbstractBlockchain {
 
     private Block bestBlock;
 
-    @GuardedBy("readWriteLock")
+    @GuardedBy("internalsBlockStoresReadWriteLock")
     private Map<Keccak256, Block> blocksByHash;
 
-    @GuardedBy("readWriteLock")
+    @GuardedBy("internalsBlockStoresReadWriteLock")
     private Map<Long, List<Block>> blocksByNumber;
 
     AbstractBlockchain(Blockchain realBlockchain, int height) {
@@ -50,10 +50,9 @@ public class AbstractBlockchain {
         fillBlockStoreWithMissingBlocks();
     }
 
-    public synchronized void add(Block blockToAdd) {
-        bestBlock = blockToAdd;
-
-        synchronized (readWriteLock) {
+    public void add(Block blockToAdd) {
+        synchronized (internalsBlockStoresReadWriteLock) {
+            bestBlock = blockToAdd;
             blocksByHash.put(blockToAdd.getHash(), blockToAdd);
             addToBlockByNumberMap(blockToAdd);
 
@@ -62,10 +61,9 @@ public class AbstractBlockchain {
         }
     }
 
-    public synchronized List<Block> get() {
-        ArrayList<Block> resultBlockchain = new ArrayList<>();
-
-        synchronized (readWriteLock){
+    public List<Block> get() {
+        synchronized (internalsBlockStoresReadWriteLock){
+            ArrayList<Block> resultBlockchain = new ArrayList<>();
             Block currentBlock = bestBlock;
             for(int i = 0; i < height; i++) {
                 resultBlockchain.add(currentBlock);
@@ -74,9 +72,9 @@ public class AbstractBlockchain {
                 }
                 currentBlock = blocksByHash.get(currentBlock.getParentHash());
             }
-        }
 
-        return resultBlockchain;
+            return resultBlockchain;
+        }
     }
 
     private void fillBlockStoreWithMissingBlocks() {
