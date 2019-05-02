@@ -87,8 +87,10 @@ public class AbstractBlockchain {
     private void fillBlockStoreWithMissingBlocks(Block bestBlock, int numberOfBlocksToFill) {
         Block currentBlock = bestBlock;
         for(int i = 0; i < numberOfBlocksToFill; i++) {
-            blocksByHash.put(currentBlock.getHash(), currentBlock);
-            addToBlockByNumberMap(currentBlock);
+            if(!blocksByHash.containsKey(currentBlock.getHash())) {
+                blocksByHash.put(currentBlock.getHash(), currentBlock);
+                addToBlockByNumberMap(currentBlock);
+            }
             if(currentBlock.isGenesis()) {
                 break;
             }
