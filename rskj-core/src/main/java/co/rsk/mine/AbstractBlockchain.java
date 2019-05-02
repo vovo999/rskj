@@ -47,7 +47,7 @@ public class AbstractBlockchain {
         this.bestBlock = realBlockchain.getBestBlock();
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
-        fillBlockStoreWithMissingBlocks(bestBlock, height);
+        fillBlockStoreWithMissingBlocks();
     }
 
     public synchronized void add(Block blockToAdd) {
@@ -57,12 +57,7 @@ public class AbstractBlockchain {
             blocksByHash.put(blockToAdd.getHash(), blockToAdd);
             addToBlockByNumberMap(blockToAdd);
 
-            // there was at least one block at the level of blockToAdd
-            if (!blocksByHash.containsKey(blockToAdd.getParentHash())) {
-                fillBlockStoreWithMissingBlocks(blockchain.getBlockByHash(blockToAdd.getParentHash().getBytes()),
-                        height - 1);
-            }
-
+            fillBlockStoreWithMissingBlocks();
             deleteEntriesOutOfBoundaries();
         }
     }
@@ -84,9 +79,9 @@ public class AbstractBlockchain {
         return resultBlockchain;
     }
 
-    private void fillBlockStoreWithMissingBlocks(Block bestBlock, int numberOfBlocksToFill) {
+    private void fillBlockStoreWithMissingBlocks() {
         Block currentBlock = bestBlock;
-        for(int i = 0; i < numberOfBlocksToFill; i++) {
+        for(int i = 0; i < height; i++) {
             if(!blocksByHash.containsKey(currentBlock.getHash())) {
                 blocksByHash.put(currentBlock.getHash(), currentBlock);
                 addToBlockByNumberMap(currentBlock);
