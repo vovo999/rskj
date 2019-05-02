@@ -31,7 +31,7 @@ public class AbstractBlockchain {
 
     private final int height;
 
-    private Blockchain blockchain;
+    private Blockchain realBlockchain;
 
     private Block bestBlock;
 
@@ -41,9 +41,12 @@ public class AbstractBlockchain {
     @GuardedBy("internalsBlockStoresReadWriteLock")
     private Map<Long, List<Block>> blocksByNumber;
 
+    @GuardedBy("internalsBlockStoresReadWriteLock")
+    private List<Block> blockchain;
+
     AbstractBlockchain(Blockchain realBlockchain, int height) {
         this.height = height;
-        this.blockchain = realBlockchain;
+        this.realBlockchain = realBlockchain;
         this.bestBlock = realBlockchain.getBestBlock();
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
@@ -62,33 +65,29 @@ public class AbstractBlockchain {
     }
 
     public List<Block> get() {
-        synchronized (internalsBlockStoresReadWriteLock){
-            ArrayList<Block> resultBlockchain = new ArrayList<>();
-            Block currentBlock = bestBlock;
-            for(int i = 0; i < height; i++) {
-                resultBlockchain.add(currentBlock);
-                if(currentBlock.isGenesis()) {
-                    break;
-                }
-                currentBlock = blocksByHash.get(currentBlock.getParentHash());
-            }
-
-            return resultBlockchain;
+        synchronized (internalsBlockStoresReadWriteLock) {
+            return blockchain;
         }
     }
 
     private void fillBlockStoreWithMissingBlocks() {
+        List<Block> newBlockchain = new ArrayList<>(height);
         Block currentBlock = bestBlock;
         for(int i = 0; i < height; i++) {
+            newBlockchain.add(currentBlock);
+
             if(!blocksByHash.containsKey(currentBlock.getHash())) {
                 blocksByHash.put(currentBlock.getHash(), currentBlock);
                 addToBlockByNumberMap(currentBlock);
             }
+
             if(currentBlock.isGenesis()) {
                 break;
             }
-            currentBlock = blockchain.getBlockByHash(currentBlock.getParentHash().getBytes());
+            currentBlock = realBlockchain.getBlockByHash(currentBlock.getParentHash().getBytes());
         }
+
+        blockchain = newBlockchain;
     }
 
     private void addToBlockByNumberMap(Block blockToAdd) {
