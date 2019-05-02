@@ -37,6 +37,28 @@ import static org.mockito.Mockito.when;
 public class AbstractBlockchainTest {
 
     @Test
+    public void creationIsCorrect() {
+        Blockchain realBlockchain = createBlockchain(3);
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+
+        List<Block> result = testBlockchain.get();
+
+        assertNotNull(result);
+
+        Block bestBlock = realBlockchain.getBestBlock();
+        assertThat(result.get(0).getNumber(), is(2L));
+        assertThat(result.get(0).getHash(), is(bestBlock.getHash()));
+
+        Block bestBlockParent = realBlockchain.getBlockByHash(bestBlock.getParentHash().getBytes());
+        assertThat(result.get(1).getNumber(), is(1L));
+        assertThat(result.get(1).getHash(), is(bestBlockParent.getHash()));
+
+        Block genesisBlock = realBlockchain.getBlockByHash(bestBlockParent.getParentHash().getBytes());
+        assertThat(result.get(2).getNumber(), is(0L));
+        assertThat(result.get(2).getHash(), is(genesisBlock.getHash()));
+    }
+
+    @Test
     public void createWithLessBlocksThanMaxHeight() {
         AbstractBlockchain testBlockchain = new AbstractBlockchain(createBlockchain(10), 11);
 
@@ -44,6 +66,26 @@ public class AbstractBlockchainTest {
 
         assertNotNull(result);
         assertThat(result.size(), is(10));
+    }
+
+    @Test
+    public void createWithBlocksEqualToMaxHeight() {
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(createBlockchain(4), 4);
+
+        List<Block> result = testBlockchain.get();
+
+        assertNotNull(result);
+        assertThat(result.size(), is(4));
+    }
+
+    @Test
+    public void createWithMoreBlocksThanMaxHeight() {
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(createBlockchain(42), 6);
+
+        List<Block> result = testBlockchain.get();
+
+        assertNotNull(result);
+        assertThat(result.size(), is(6));
     }
 
     private Blockchain createBlockchain(int height) {
