@@ -33,8 +33,6 @@ public class AbstractBlockchain {
 
     private Blockchain realBlockchain;
 
-    private Block bestBlock;
-
     @GuardedBy("internalsBlockStoresReadWriteLock")
     private Map<Keccak256, Block> blocksByHash;
 
@@ -47,20 +45,18 @@ public class AbstractBlockchain {
     AbstractBlockchain(Blockchain realBlockchain, int height) {
         this.height = height;
         this.realBlockchain = realBlockchain;
-        this.bestBlock = realBlockchain.getBestBlock();
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
-        fillBlockStoreWithMissingBlocks();
+        fillInternalsBlockStore(realBlockchain.getBestBlock());
     }
 
-    public void add(Block blockToAdd) {
+    public void addBestBlock(Block bestBlock) {
         synchronized (internalsBlockStoresReadWriteLock) {
-            bestBlock = blockToAdd;
-            blocksByHash.put(blockToAdd.getHash(), blockToAdd);
-            addToBlockByNumberMap(blockToAdd);
+            blocksByHash.put(bestBlock.getHash(), bestBlock);
+            addToBlockByNumberMap(bestBlock);
 
-            fillBlockStoreWithMissingBlocks();
-            deleteEntriesOutOfBoundaries();
+            fillInternalsBlockStore(bestBlock);
+            deleteEntriesOutOfBoundaries(bestBlock.getNumber());
         }
     }
 
@@ -70,7 +66,7 @@ public class AbstractBlockchain {
         }
     }
 
-    private void fillBlockStoreWithMissingBlocks() {
+    private void fillInternalsBlockStore(Block bestBlock) {
         List<Block> newBlockchain = new ArrayList<>(height);
         Block currentBlock = bestBlock;
         for(int i = 0; i < height; i++) {
@@ -99,8 +95,8 @@ public class AbstractBlockchain {
         }
     }
 
-    private void deleteEntriesOutOfBoundaries() {
-        long blocksHeightToDelete = bestBlock.getNumber() - height;
+    private void deleteEntriesOutOfBoundaries(long bestBlockNumber) {
+        long blocksHeightToDelete = bestBlockNumber - height;
         if(blocksHeightToDelete >= 0) {
             blocksByNumber.get(blocksHeightToDelete).forEach(blockToDelete -> blocksByHash.remove(blockToDelete.getHash()));
             blocksByNumber.remove(blocksHeightToDelete);

@@ -99,7 +99,7 @@ public class AbstractBlockchainTest {
         AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 3);
 
         Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
-        testBlockchain.add(newBestBlockD);
+        testBlockchain.addBestBlock(newBestBlockD);
 
         List<Block> result = testBlockchain.get();
 
@@ -120,7 +120,7 @@ public class AbstractBlockchainTest {
         AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
 
         Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
-        testBlockchain.add(newBestBlockD);
+        testBlockchain.addBestBlock(newBestBlockD);
 
         List<Block> result = testBlockchain.get();
 
@@ -140,7 +140,7 @@ public class AbstractBlockchainTest {
         AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
 
         Block newBestBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
-        testBlockchain.add(newBestBlockB);
+        testBlockchain.addBestBlock(newBestBlockB);
 
         List<Block> result = testBlockchain.get();
 
@@ -164,7 +164,7 @@ public class AbstractBlockchainTest {
         when(realBlockchain.getBlockByNumber(1L)).thenReturn(newBlockB);
 
         Block newBestBlockC = createBlock(2, newBlockB.getHash());
-        testBlockchain.add(newBestBlockC);
+        testBlockchain.addBestBlock(newBestBlockC);
 
         List<Block> result = testBlockchain.get();
 
