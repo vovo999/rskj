@@ -91,6 +91,27 @@ public class AbstractBlockchainTest {
     /**
      * Blockchain has blocks A (genesis) -> B -> C (best block)
      * A new block D has been added to the real blockchain triggering an add on the abstract blockchain
+     * After the add, abstract blockchain must be B -> C -> D (best block) because max height is 3
+     */
+    @Test
+    public void addBlockToTheTipOfTheBlockchainGettingOverMaxHeight() {
+        Blockchain realBlockchain = createBlockchain(3);
+        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 3);
+
+        Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
+        testBlockchain.add(newBestBlockD);
+
+        List<Block> result = testBlockchain.get();
+
+        assertThat(result.size(), is(3));
+        Block bestBlock = result.get(0);
+        assertThat(bestBlock.getNumber(), is(3L));
+        assertThat(bestBlock.getHash(), is(newBestBlockD.getHash()));
+    }
+
+    /**
+     * Blockchain has blocks A (genesis) -> B -> C (best block)
+     * A new block D has been added to the real blockchain triggering an add on the abstract blockchain
      * After the add, abstract blockchain must be A (genesis) -> B -> C -> D (best block)
      */
     @Test

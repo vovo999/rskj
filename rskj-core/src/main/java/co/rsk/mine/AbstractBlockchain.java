@@ -104,7 +104,7 @@ public class AbstractBlockchain {
 
     private void deleteEntriesOutOfBoundaries() {
         long blocksHeightToDelete = bestBlock.getNumber() - height;
-        if(blocksHeightToDelete > 0) {
+        if(blocksHeightToDelete >= 0) {
             blocksByNumber.get(blocksHeightToDelete).forEach(blockToDelete -> blocksByHash.remove(blockToDelete.getHash()));
             blocksByNumber.remove(blocksHeightToDelete);
         }
