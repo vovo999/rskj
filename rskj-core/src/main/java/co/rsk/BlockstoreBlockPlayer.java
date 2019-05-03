@@ -39,7 +39,7 @@ public class BlockstoreBlockPlayer {
         this.targetBlockchain = objects.getBlockchain();
         this.blockFactory = objects.getBlockFactory();
         this.blockNumber = targetBlockchain.getBestBlock().getNumber() + 1;
-        objects.getBlockStore().setUseSnappy();
+        //objects.getBlockStore().setUseSnappy();
     }
 
     private void connectBlocks() {
@@ -75,7 +75,7 @@ public class BlockstoreBlockPlayer {
             return;
         }*/
 
-        args = new String[] {"-base-path", "/home/julian/.rsk/mainnet-snappy-test", "/home/julian/workspace/DB-Mainnet/database/mainnet"};
+        args = new String[] {"-base-path", "/home/julian/.rsk/mainnet-test", "/home/julian/workspace/DB-Mainnet/database/mainnet"};
 
         String[] nodeCliArgs = Arrays.copyOf(args, args.length - 1);
         RskContext objects = new RskContext(nodeCliArgs);
