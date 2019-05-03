@@ -32,7 +32,7 @@ public class RegTestSecondForkConfig extends RegTestOrchidConfig {
     }
 
     @Override
-    public boolean isRskipGetBtcTransactionConfirmations() {
+    public boolean isRskip122() {
         return true;
     }
 }

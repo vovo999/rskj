@@ -32,7 +32,7 @@ public class TestNetSecondForkConfig extends TestNetOrchid060Config {
     }
 
     @Override
-    public boolean isRskipGetBtcTransactionConfirmations() {
+    public boolean isRskip122() {
         return true;
     }
 }
