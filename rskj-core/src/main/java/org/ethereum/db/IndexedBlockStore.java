@@ -62,6 +62,7 @@ public class IndexedBlockStore implements BlockStore {
     private final KeyValueDataSource blocks;
     private final BlockFactory blockFactory;
 
+
     private boolean useSnappy = false;
 
     public IndexedBlockStore(

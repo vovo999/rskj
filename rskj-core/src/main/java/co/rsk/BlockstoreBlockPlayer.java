@@ -75,7 +75,7 @@ public class BlockstoreBlockPlayer {
             return;
         }*/
 
-        args = new String[] {"-base-path", "/home/julian/.rsk/mainnet-test", "/home/julian/workspace/DB-Mainnet/database/mainnet"};
+        args = new String[] {"-base-path", "/home/julian/.rsk/mainnet-test", "/home/julian/.rsk/mainnet-snappy"};
 
         String[] nodeCliArgs = Arrays.copyOf(args, args.length - 1);
         RskContext objects = new RskContext(nodeCliArgs);

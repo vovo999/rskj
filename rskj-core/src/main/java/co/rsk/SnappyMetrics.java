@@ -7,6 +7,7 @@ import org.ethereum.db.BlockInformation;
 import org.ethereum.db.BlockStore;
 import org.ethereum.util.ByteUtil;
 
+
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -16,6 +17,7 @@ public class SnappyMetrics {
     public static final int VALUES_TO_GENERATE = 3000;
     public static final int MIN = 1;
     public static final int MAX = 300000;
+
     private BlockStore blockchain;
     private BlockStore blockchainWithSnappy;
     private Blockchain snappyDummyBlockchain;
@@ -182,7 +184,7 @@ public class SnappyMetrics {
         return snappyTime;
     }
 
-/*
+
     public long[] compareReads () {
         Random valueSource = new Random();
         IntStream blockNumbers = valueSource.ints(VALUES_TO_GENERATE, MIN, MAX);
@@ -225,7 +227,7 @@ public class SnappyMetrics {
 
         /*System.out.println("Read with normal time: " + normalTime);
         System.out.println("Read with snappy time: " + snappyTime);
-        System.out.println("Percentage: " + (100 - (snappyTime*100/normalTime)));
+        System.out.println("Percentage: " + (100 - (snappyTime*100/normalTime)));*/
 
     }
 
@@ -246,7 +248,7 @@ public class SnappyMetrics {
         System.out.println("Average of time with normal db " + normalTotalTime/times);
         System.out.println("Average of time with snappy db " + snappyTotalTime/times);
     }
-*/
+
 
     public void compareBlockchain() {
 
