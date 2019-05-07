@@ -47,14 +47,32 @@ public class ForkDetectionDataBuilder {
             return new byte[0];
         }
 
+        byte[] forkDetectionData = new byte[12];
+
+        byte[] commitToParentsVector = buildCommitToParentsVector();
+        System.arraycopy(commitToParentsVector, 0, forkDetectionData, 0, 7);
+
+        short numberOfUncles = getNumberOfUncles();
+        forkDetectionData[7] = ByteBuffer.allocate(2).putShort(numberOfUncles).array()[1];
+
+        byte[] blockBeingMinedHeight = getBlockBeingMinedHeight();
+        System.arraycopy(blockBeingMinedHeight, 0, forkDetectionData, 8, 4);
+
+        return forkDetectionData;
+    }
+
+    private byte[] buildCommitToParentsVector() {
         NetworkParameters params = RegTestParams.get();
         new Context(params);
 
         long bestBlockHeight = mainchainBlocks.get(0).getNumber();
         long blockBeingMinedHeight = bestBlockHeight + 1;
-        long cpvStartHeight = isMultipleOf64(blockBeingMinedHeight) ? (long)Math.floor((blockBeingMinedHeight - 1)/(double)64) * 64 : (long)Math.floor(blockBeingMinedHeight/(double)64) * 64;
+        long cpvStartHeight = (isMultipleOf64(blockBeingMinedHeight) ?
+                                (long)Math.floor((blockBeingMinedHeight - 1) / (double)CPV_JUMP_FACTOR) :
+                                (long)Math.floor(blockBeingMinedHeight / (double)CPV_JUMP_FACTOR))
+                                * CPV_JUMP_FACTOR;
 
-        byte[] forkDetectionData = new byte[12];
+        byte[] commitToParentsVector = new byte[7];
         for(int i = 0; i < CPV_SIZE; i++){
             long currentCpvElement = bestBlockHeight - cpvStartHeight + i * 64;
             Block block = mainchainBlocks.get((int)currentCpvElement);
@@ -63,24 +81,26 @@ public class ForkDetectionDataBuilder {
             byte[] bitcoinBlockHash = params.getDefaultSerializer().makeBlock(bitcoinBlock).getHash().getBytes();
             byte leastSignificantByte = bitcoinBlockHash[bitcoinBlockHash.length - 1];
 
-            forkDetectionData[i] = leastSignificantByte;
+            commitToParentsVector[i] = leastSignificantByte;
         }
 
-        // int to short is a safe cast since number of uncles is max 7 and blocks evaluated are at most 32.
-        // Hence, 7 * 32 = 224 and 224 < 255 (max number that fits on a short type variable)
-        short numberOfUncles = (short)IntStream
-                                        .range(0, NUMBER_OF_UNCLES)
-                                        .map(i -> mainchainBlocks.get(i).getUncleList().size()).sum();
-
-        forkDetectionData[7] = ByteBuffer.allocate(2).putShort(numberOfUncles).array()[1];
-
-        byte[] blockBeingMinedNumber = ByteBuffer.allocate(4).putInt((int)blockBeingMinedHeight).array();
-        System.arraycopy(blockBeingMinedNumber, 0, forkDetectionData, 8, 4);
-
-        return forkDetectionData;
+        return commitToParentsVector;
     }
 
     private boolean isMultipleOf64(long number){
         return number % 64 == 0;
+    }
+
+    private short getNumberOfUncles() {
+        // int to short is a safe cast since number of uncles is max 7 and blocks evaluated are at most 32.
+        // Hence, 7 * 32 = 224 and 224 < 255 (max number that fits on a short type variable)
+        return (short)IntStream
+                .range(0, NUMBER_OF_UNCLES)
+                .map(i -> mainchainBlocks.get(i).getUncleList().size()).sum();
+    }
+
+    private byte[] getBlockBeingMinedHeight() {
+        long blockBeingMinedHeight = mainchainBlocks.get(0).getNumber() + 1;
+        return ByteBuffer.allocate(4).putInt((int)blockBeingMinedHeight).array();
     }
 }
