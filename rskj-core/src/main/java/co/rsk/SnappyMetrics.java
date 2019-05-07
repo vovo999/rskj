@@ -17,6 +17,8 @@ public class SnappyMetrics {
     public static final int VALUES_TO_GENERATE = 3000;
     public static final int MIN = 1;
     public static final int MAX = 300000;
+    private final String[] normalDummyPath;
+    private final String[] snappyDummyPath;
 
     private BlockStore blockchain;
     private BlockStore blockchainWithSnappy;
@@ -29,6 +31,8 @@ public class SnappyMetrics {
 
         this.rW = readWrite;
         this.useSnappy = useSnappy;
+        this.normalDummyPath = new String[] {"-base-path", "/home/julian/.rsk/snappy-dummy-test"};
+        this.snappyDummyPath = new String[] {"-base-path", "/home/julian/.rsk/normal-dummy-test"};
 
         if (useSnappy){
             this.blockchainWithSnappy = RskContext.buildBlockStore(objects.getBlockFactory(), bcWithSnappy).setUseSnappy();
@@ -38,11 +42,11 @@ public class SnappyMetrics {
 
         if (!rW) {
             if (useSnappy){
-                RskContext rskContextSnappyDummy = new RskContext(new String[]{"-base-path" , "/home/julian/.rsk/snappy-dummy-test"});
+                RskContext rskContextSnappyDummy = new RskContext(normalDummyPath);
                 rskContextSnappyDummy.getBlockStore().setUseSnappy();
                 this.snappyDummyBlockchain = rskContextSnappyDummy.getBlockchain();
             } else {
-                RskContext rskContextNormalDummy = new RskContext(new String[]{"-base-path" , "/home/julian/.rsk/normal-dummy-test"});
+                RskContext rskContextNormalDummy = new RskContext(snappyDummyPath);
                 rskContextNormalDummy.getBlockStore();
                 this.normalDummyBlockchain = rskContextNormalDummy.getBlockchain();
             }
