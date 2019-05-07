@@ -25,6 +25,7 @@ import co.rsk.bitcoinj.params.RegTestParams;
 import co.rsk.crypto.Keccak256;
 import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.core.Block;
+import org.ethereum.core.BlockHeader;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.when;
 public class ForkDataDetectionBuilderTest {
 
     @Test
-    public void creationIsCorrectWithMinPossibleBlockchainHeight() {
+    public void buildWithMinPossibleBlockchainHeight() {
         List<Block> lastBlockchainBlocks = createBlockchainAsList(449);
 
         ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(lastBlockchainBlocks);
@@ -75,13 +76,141 @@ public class ForkDataDetectionBuilderTest {
         assertThat(forkDetectionData[11], is((byte)193));
     }
 
-    private byte getBtcBlockHashLeastSignificantByte(byte[] array) {
-        NetworkParameters params = RegTestParams.get();
-        new Context(params);
+    @Test
+    public void buildReturnsEmptyWhenNotEnoughBlocks() {
+        List<Block> lastBlockchainBlocks = createBlockchainAsList(250);
 
-        byte[] blockHash = params.getDefaultSerializer().makeBlock(array).getHash().getBytes();
+        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(lastBlockchainBlocks);
 
-        return blockHash[blockHash.length - 1];
+        byte[] forkDetectionData = builder.build();
+
+        assertThat(forkDetectionData.length, is(0));
+    }
+
+    @Test
+    public void buildWithDivisibleBy64height() {
+        List<Block> lastBlockchainBlocks = createBlockchainAsList(512);
+        List<Block> trimmedBlocks = lastBlockchainBlocks.subList(0, 449);
+
+        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(trimmedBlocks);
+
+        byte[] forkDetectionData = builder.build();
+
+        assertThat(forkDetectionData.length, is(12));
+
+        assertThat(forkDetectionData[0],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(63).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[1],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(127).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[2],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(191).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[3],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(255).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[4],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(319).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[5],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(383).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[6],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(446).getBitcoinMergedMiningHeader())));
+
+        assertThat(forkDetectionData[7], is((byte)0));
+
+        assertThat(forkDetectionData[8], is((byte)0));
+        assertThat(forkDetectionData[9], is((byte)0));
+        assertThat(forkDetectionData[10], is((byte)2));
+        assertThat(forkDetectionData[11], is((byte)0));
+    }
+
+    @Test
+    public void buildWithUnclesOnPreviousBlocks() {
+        List<Block> lastBlockchainBlocks = createBlockchainWithUnclesAsList(512, false);
+        List<Block> trimmedBlocks = lastBlockchainBlocks.subList(0, 449);
+
+        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(trimmedBlocks);
+
+        byte[] forkDetectionData = builder.build();
+
+        assertThat(forkDetectionData.length, is(12));
+
+        assertThat(forkDetectionData[0],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(63).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[1],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(127).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[2],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(191).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[3],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(255).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[4],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(319).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[5],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(383).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[6],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(446).getBitcoinMergedMiningHeader())));
+
+        assertThat(forkDetectionData[7], is((byte)90));
+
+        assertThat(forkDetectionData[8], is((byte)0));
+        assertThat(forkDetectionData[9], is((byte)0));
+        assertThat(forkDetectionData[10], is((byte)2));
+        assertThat(forkDetectionData[11], is((byte)0));
+    }
+
+    @Test
+    public void buildWithMaxUnclesOnPreviousBlocks() {
+        List<Block> lastBlockchainBlocks = createBlockchainWithMaxUnclesAsList(564);
+        List<Block> trimmedBlocks = lastBlockchainBlocks.subList(0, 449);
+
+        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(trimmedBlocks);
+
+        byte[] forkDetectionData = builder.build();
+
+        assertThat(forkDetectionData.length, is(12));
+
+        assertThat(forkDetectionData[0],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(52).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[1],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(116).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[2],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(180).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[3],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(244).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[4],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(308).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[5],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(372).getBitcoinMergedMiningHeader())));
+        assertThat(forkDetectionData[6],
+                is(getBtcBlockHashLeastSignificantByte(trimmedBlocks.get(436).getBitcoinMergedMiningHeader())));
+
+        assertThat(forkDetectionData[7], is((byte)224));
+
+        assertThat(forkDetectionData[8], is((byte)0));
+        assertThat(forkDetectionData[9], is((byte)0));
+        assertThat(forkDetectionData[10], is((byte)2));
+        assertThat(forkDetectionData[11], is((byte)52));
+    }
+
+    private List<Block> createBlockchainWithMaxUnclesAsList(int height) {
+        return createBlockchainWithUnclesAsList(height, true);
+    }
+
+    private List<Block> createBlockchainWithUnclesAsList(int height, boolean maxUncles) {
+        List<Block> blocksUncles = createBlockchainAsList(height);
+        int i = 0;
+        for(Block block : blocksUncles) {
+            when(block.getUncleList()).thenReturn(createUncleList(maxUncles ? 7 : i % 7));
+            i++;
+        }
+
+        return blocksUncles;
+    }
+
+    private List<BlockHeader> createUncleList(int numberOfUncles) {
+        List<BlockHeader> uncles = new ArrayList<>();
+        for(int i = 0; i < numberOfUncles; i++) {
+            uncles.add(mock(BlockHeader.class));
+        }
+
+        return uncles;
     }
 
     private List<Block> createBlockchainAsList(int height) {
@@ -156,5 +285,14 @@ public class ForkDataDetectionBuilderTest {
         bitcoinBlock.setTime(blockTime);
 
         return bitcoinBlock;
+    }
+
+    private byte getBtcBlockHashLeastSignificantByte(byte[] array) {
+        NetworkParameters params = RegTestParams.get();
+        new Context(params);
+
+        byte[] blockHash = params.getDefaultSerializer().makeBlock(array).getHash().getBytes();
+
+        return blockHash[blockHash.length - 1];
     }
 }

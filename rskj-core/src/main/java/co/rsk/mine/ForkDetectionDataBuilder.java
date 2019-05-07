@@ -66,9 +66,13 @@ public class ForkDetectionDataBuilder {
             forkDetectionData[i] = leastSignificantByte;
         }
 
-        short numberOfUncles = (short)IntStream.range(0, 32).map(i -> mainchainBlocks.get(0).getUncleList().size()).sum();
+        // int to short is a safe cast since number of uncles is max 7 and blocks evaluated are at most 32.
+        // Hence, 7 * 32 = 224 and 224 < 255 (max number that fits on a short type variable)
+        short numberOfUncles = (short)IntStream
+                                        .range(0, NUMBER_OF_UNCLES)
+                                        .map(i -> mainchainBlocks.get(i).getUncleList().size()).sum();
 
-        forkDetectionData[7] = ByteBuffer.allocate(2).putShort(numberOfUncles).array()[0];
+        forkDetectionData[7] = ByteBuffer.allocate(2).putShort(numberOfUncles).array()[1];
 
         byte[] blockBeingMinedNumber = ByteBuffer.allocate(4).putInt((int)blockBeingMinedHeight).array();
         System.arraycopy(blockBeingMinedNumber, 0, forkDetectionData, 8, 4);
