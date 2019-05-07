@@ -20,6 +20,7 @@ package co.rsk.core.bc;
 
 import co.rsk.config.RskSystemProperties;
 import co.rsk.db.StateRootHandler;
+import org.ethereum.core.BlockFactory;
 import org.ethereum.core.Repository;
 import org.ethereum.core.TransactionExecutor;
 import org.ethereum.db.BlockStore;
@@ -40,6 +41,7 @@ public class BlockExecutorFactory {
     private final ReceiptStore receiptStore;
     private final ProgramInvokeFactory programInvokeFactory;
     private final EthereumListener ethereumListener;
+    private final BlockFactory blockFactory;
 
     public BlockExecutorFactory(RskSystemProperties config,
             Repository repository,
@@ -47,7 +49,8 @@ public class BlockExecutorFactory {
             ReceiptStore receiptStore,
             ProgramInvokeFactory programInvokeFactory,
             EthereumListener ethereumListener,
-            StateRootHandler stateRootHandler) {
+            StateRootHandler stateRootHandler,
+            BlockFactory blockFactory) {
         this.config = config;
         this.repository = repository;
         this.blockStore = blockStore;
@@ -55,6 +58,7 @@ public class BlockExecutorFactory {
         this.programInvokeFactory = programInvokeFactory;
         this.ethereumListener = ethereumListener;
         this.stateRootHandler = stateRootHandler;
+        this.blockFactory = blockFactory;
     }
 
     public BlockExecutor newInstance(ProgramTraceProcessor programTraceProcessor) {
@@ -67,6 +71,7 @@ public class BlockExecutorFactory {
                         track1,
                         blockStore,
                         receiptStore,
+                        blockFactory,
                         programInvokeFactory,
                         block1,
                         ethereumListener,

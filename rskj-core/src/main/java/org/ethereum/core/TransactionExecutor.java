@@ -130,10 +130,12 @@ public class TransactionExecutor {
     }
 
     public TransactionExecutor(Transaction tx, int txindex, RskAddress coinbase, Repository track, BlockStore blockStore, ReceiptStore receiptStore,
+                               BlockFactory blockFactory,
                                ProgramInvokeFactory programInvokeFactory, Block executionBlock, EthereumListener listener, long gasUsedInTheBlock,
                                VmConfig vmConfig, BlockchainNetConfig blockchainConfig, boolean playVm, boolean remascEnabled,
                                boolean vmTrace, PrecompiledContracts precompiledContracts, String databaseDir, String vmTraceDir, boolean vmTraceCompressed) {
         this(tx, txindex, coinbase, track, blockStore, receiptStore,
+            blockFactory,
             programInvokeFactory, executionBlock, listener, gasUsedInTheBlock,
             vmConfig, blockchainConfig, playVm, remascEnabled,
             precompiledContracts,
