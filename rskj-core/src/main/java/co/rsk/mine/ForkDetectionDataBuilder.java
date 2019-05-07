@@ -29,7 +29,11 @@ import java.util.stream.IntStream;
 
 public class ForkDetectionDataBuilder {
 
-    private final int CPV_SIZE = 7;
+    private static final int CPV_SIZE = 7;
+
+    private static final int CPV_JUMP_FACTOR = 64;
+
+    private static final int NUMBER_OF_UNCLES = 32;
 
     private final List<Block> mainchainBlocks;
 
@@ -38,6 +42,11 @@ public class ForkDetectionDataBuilder {
     }
 
     public byte[] build() {
+        // + 1 because genesis block can't be used since it does not contain a valid BTC header
+        if (mainchainBlocks.size() < CPV_SIZE * CPV_JUMP_FACTOR + 1) {
+            return new byte[0];
+        }
+
         NetworkParameters params = RegTestParams.get();
         new Context(params);
 
@@ -47,7 +56,7 @@ public class ForkDetectionDataBuilder {
 
         byte[] forkDetectionData = new byte[12];
         for(int i = 0; i < CPV_SIZE; i++){
-            long currentCpvElement = bestBlockHeight - cpvStartHeight - i * 64;
+            long currentCpvElement = bestBlockHeight - cpvStartHeight + i * 64;
             Block block = mainchainBlocks.get((int)currentCpvElement);
             byte[] bitcoinBlock = block.getBitcoinMergedMiningHeader();
 
@@ -57,12 +66,12 @@ public class ForkDetectionDataBuilder {
             forkDetectionData[i] = leastSignificantByte;
         }
 
-        int numberOfUncles = IntStream.range(0, 32).map(i -> mainchainBlocks.get(0).getUncleList().size()).sum();
+        short numberOfUncles = (short)IntStream.range(0, 32).map(i -> mainchainBlocks.get(0).getUncleList().size()).sum();
 
-        forkDetectionData[7] = ByteBuffer.allocate(1).putInt(numberOfUncles).array()[0];
+        forkDetectionData[7] = ByteBuffer.allocate(2).putShort(numberOfUncles).array()[0];
 
-        byte[] blockBeingMinedNumber = ByteBuffer.allocate(4).putLong(blockBeingMinedHeight).array();
-        System.arraycopy(blockBeingMinedNumber, 0, forkDetectionData, 7, 4);
+        byte[] blockBeingMinedNumber = ByteBuffer.allocate(4).putInt((int)blockBeingMinedHeight).array();
+        System.arraycopy(blockBeingMinedNumber, 0, forkDetectionData, 8, 4);
 
         return forkDetectionData;
     }
