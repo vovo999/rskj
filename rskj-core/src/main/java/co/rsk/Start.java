@@ -75,13 +75,13 @@ public class Start {
         }
 
         // this block number has to be validated before the release to ensure the migration works fine for every user
-        int blockNumberToMigrate = 800613;
-        Block blockToMigrate = ctx.getBlockStore().getChainBlockByNumber(blockNumberToMigrate);
-        if (blockToMigrate == null) {
+        int minimumBlockNumberToMigrate = 800000;
+        Block blockToMigrate = ctx.getBlockStore().getBestBlock();
+        if (blockToMigrate == null || blockToMigrate.getNumber() < minimumBlockNumberToMigrate) {
             logger.error(
                     "The database can't be migrated because the node wasn't up to date before upgrading. " +
-                    "Please reset the database or sync up to block {} with the previous version to continue.",
-                    blockNumberToMigrate
+                    "Please reset the database or sync past block {} with the previous version to continue.",
+                    minimumBlockNumberToMigrate
             );
             logger.error("Reset database or continue syncing with previous version");
             System.exit(1);
