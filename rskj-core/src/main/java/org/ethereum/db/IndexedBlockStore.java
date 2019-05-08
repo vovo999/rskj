@@ -262,17 +262,18 @@ public class IndexedBlockStore implements BlockStore {
             return block;
         }
 
-        byte[] blockRlp = new byte[0];
-
-        try {
-            blockRlp = useSnappy ?  Snappy.uncompress(blocks.get(hash))  :  blocks.get(hash);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        byte[] blockRlp = blocks.get(hash);
 
         if (blockRlp == null) {
             return null;
         }
+
+        try {
+            blockRlp = useSnappy ?  Snappy.uncompress(blockRlp)  : blockRlp;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         return blockFactory.decodeBlock(blockRlp);
     }
