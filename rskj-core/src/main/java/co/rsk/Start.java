@@ -18,6 +18,7 @@
 package co.rsk;
 
 import co.rsk.cli.migration.UnitrieMigrationTool;
+import org.ethereum.core.Block;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,22 +33,7 @@ public class Start {
 
     public static void main(String[] args) {
         RskContext ctx = new RskContext(args);
-        // we need to check before the data source is init'ed
-        if (!Files.exists(Paths.get(ctx.getRskSystemProperties().databaseDir(), "unitrie"))) {
-            UnitrieMigrationTool unitrieMigrationTool = new UnitrieMigrationTool(
-                    ctx.getRskSystemProperties().databaseDir(),
-                    ctx.getBlockStore(),
-                    ctx.getRepository(),
-                    ctx.getStateRootHandler(),
-                    ctx.getTrieConverter()
-            );
-            if (unitrieMigrationTool.canMigrate()) {
-                unitrieMigrationTool.migrate();
-            } else {
-                logger.error("Reset database or continue syncing with previous version");
-                System.exit(1);
-            }
-        }
+        migrateStateToUnitrieIfNeeded(ctx);
 
         NodeRunner runner = ctx.getNodeRunner();
         try {
@@ -58,5 +44,57 @@ public class Start {
             runner.stop();
             System.exit(1);
         }
+    }
+
+    // this feature is only needed until the secondFork (TBD) network upgrade is activated.
+    // the whole method should be deleted after that.
+    private static void migrateStateToUnitrieIfNeeded(RskContext ctx) {
+        String databaseDir = ctx.getRskSystemProperties().databaseDir();
+        // we need to check these before the data sources are init'ed
+        boolean hasUnitrieState = Files.exists(Paths.get(databaseDir, "unitrie"));
+        boolean hasOldState = Files.exists(Paths.get(databaseDir, "state"));
+        if (hasUnitrieState) {
+            // the node has been migrated
+            return;
+        }
+
+        if (!hasOldState) {
+            // node first start or after reset
+            return;
+        }
+
+        // do this before getRepository to avoid init'ing the unitrie data store
+        String networkName = ctx.getRskSystemProperties().netName();
+        if (!"main".equals(networkName)) {
+            logger.error(
+                    "Your node has state from a previous version, and the '{}' network can't be migrated. " +
+                    "Please reset the database to continue.",
+                    networkName
+            );
+            System.exit(1);
+        }
+
+        // this block number has to be validated before the release to ensure the migration works fine for every user
+        int blockNumberToMigrate = 800613;
+        Block blockToMigrate = ctx.getBlockStore().getChainBlockByNumber(blockNumberToMigrate);
+        if (blockToMigrate == null) {
+            logger.error(
+                    "The database can't be migrated because the node wasn't up to date before upgrading. " +
+                    "Please reset the database or sync up to block {} with the previous version to continue.",
+                    blockNumberToMigrate
+            );
+            logger.error("Reset database or continue syncing with previous version");
+            System.exit(1);
+        }
+
+        UnitrieMigrationTool unitrieMigrationTool = new UnitrieMigrationTool(
+                blockToMigrate,
+                databaseDir,
+                ctx.getRepository(),
+                ctx.getStateRootHandler(),
+                ctx.getTrieConverter()
+        );
+
+        unitrieMigrationTool.migrate();
     }
 }

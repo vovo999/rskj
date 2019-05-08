@@ -31,7 +31,6 @@ import org.ethereum.core.Repository;
 import org.ethereum.crypto.Keccak256Helper;
 import org.ethereum.datasource.HashMapDB;
 import org.ethereum.datasource.KeyValueDataSource;
-import org.ethereum.db.BlockStore;
 import org.ethereum.db.ByteArrayWrapper;
 import org.ethereum.util.*;
 import org.ethereum.vm.DataWord;
@@ -56,7 +55,7 @@ public class UnitrieMigrationTool {
     private final Map<ByteArrayWrapper, RskAddress> addressHashes;
     private final TrieConverter trieConverter;
     private final Map<ByteArrayWrapper, byte[]> keccak256Cache;
-    private final BlockStore blockStore;
+    private final Block blockToMigrate;
     private final Repository unitrieRepository;
     private final StateRootHandler stateRootHandler;
 
@@ -69,9 +68,9 @@ public class UnitrieMigrationTool {
         stateRootTranslations.flush();
     }
 
-    public UnitrieMigrationTool(String databaseDir, BlockStore blockStore, Repository unitrieRepository, StateRootHandler stateRootHandler, TrieConverter trieConverter) {
+    public UnitrieMigrationTool(Block blockToMigrate, String databaseDir, Repository unitrieRepository, StateRootHandler stateRootHandler, TrieConverter trieConverter) {
         this.databaseDir = databaseDir;
-        this.blockStore = blockStore;
+        this.blockToMigrate = blockToMigrate;
         this.unitrieRepository = unitrieRepository;
         this.stateRootHandler = stateRootHandler;
         this.trieConverter = trieConverter;
@@ -92,12 +91,7 @@ public class UnitrieMigrationTool {
         this.addressHashes.put(ByteUtil.wrap(Keccak256Helper.keccak256(RemascTransaction.REMASC_ADDRESS.getBytes())), RemascTransaction.REMASC_ADDRESS);
     }
 
-    public boolean canMigrate() {
-        return getBlockToMigrate() != null;
-    }
-
     public void migrate() {
-        Block blockToMigrate = getBlockToMigrate();
         Trie migratedTrie = migrateState(blockToMigrate);
         unitrieRepository.setupContract(PrecompiledContracts.ECRECOVER_ADDR);
         unitrieRepository.flush();
@@ -106,10 +100,6 @@ public class UnitrieMigrationTool {
                 blockToMigrate.getHeader(),
                 migratedTrie
         );
-    }
-
-    public Block getBlockToMigrate() {
-        return blockStore.getChainBlockByNumber(800613);
     }
 
     public Trie migrateState(Block blockToMigrate) {

@@ -42,22 +42,24 @@ public class UnitrieComparator {
         String orchidDatabase = "/Users/diegoll/Documents/databases/mainnet-800k";
         String unitrieMigratedDatabase = "/Users/diegoll/Documents/databases/unitrie";
         String unitrieReplayedDatabase = "/Users/diegoll/Documents/databases/unitrie-mainnet-860k";
-        int blockToMigrate = 800613;
+        int blockNumberToMigrate = 800613;
 
         TrieStore migratedUnitrieStore = new TrieStoreImpl(RskContext.makeDataSource("unitrie-mainnet", unitrieMigratedDatabase));
         BlockStore unitrieReplayedBlockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), unitrieReplayedDatabase);
         TrieConverter trieConverter = new TrieConverter();
+        BlockStore orchidBlockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), orchidDatabase);
+        Block blockToMigrate = orchidBlockStore.getChainBlockByNumber(blockNumberToMigrate);
         UnitrieMigrationTool migrationTool = new UnitrieMigrationTool(
+                blockToMigrate,
                 orchidDatabase,
-                RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), orchidDatabase),
                 new MutableRepository(new Trie(migratedUnitrieStore)),
                 null, // we don't call any method requiring this object
                 trieConverter
         );
-        Trie migratedUnitrie = migrationTool.migrateState(migrationTool.getBlockToMigrate());
+        Trie migratedUnitrie = migrationTool.migrateState(blockToMigrate);
 
         KeyValueDataSource stateRootTranslations = RskContext.makeDataSource("stateRoots", unitrieReplayedDatabase);
-        Block migratedBlock = unitrieReplayedBlockStore.getChainBlockByNumber(blockToMigrate);
+        Block migratedBlock = unitrieReplayedBlockStore.getChainBlockByNumber(blockNumberToMigrate);
         TrieStore replayedUnitrieStore = new TrieStoreImpl(RskContext.makeDataSource("state", unitrieReplayedDatabase));
         byte[] blockStateRoot = migratedBlock.getStateRoot();
         Trie replayedUnitrie = replayedUnitrieStore.retrieve(stateRootTranslations.get(blockStateRoot));
