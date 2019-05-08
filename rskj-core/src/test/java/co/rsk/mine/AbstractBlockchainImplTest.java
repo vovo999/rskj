@@ -34,12 +34,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class AbstractBlockchainTest {
+public class AbstractBlockchainImplTest {
 
     @Test
     public void creationIsCorrect() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
 
         List<Block> result = testBlockchain.get();
 
@@ -60,7 +60,7 @@ public class AbstractBlockchainTest {
 
     @Test
     public void createWithLessBlocksThanMaxHeight() {
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(createBlockchain(10), 11);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(createBlockchain(10), 11);
 
         List<Block> result = testBlockchain.get();
 
@@ -70,7 +70,7 @@ public class AbstractBlockchainTest {
 
     @Test
     public void createWithBlocksEqualToMaxHeight() {
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(createBlockchain(4), 4);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(createBlockchain(4), 4);
 
         List<Block> result = testBlockchain.get();
 
@@ -80,7 +80,7 @@ public class AbstractBlockchainTest {
 
     @Test
     public void createWithMoreBlocksThanMaxHeight() {
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(createBlockchain(42), 6);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(createBlockchain(42), 6);
 
         List<Block> result = testBlockchain.get();
 
@@ -96,7 +96,7 @@ public class AbstractBlockchainTest {
     @Test
     public void addBlockToTheTipOfTheBlockchainGettingOverMaxHeight() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 3);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 3);
 
         Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
         testBlockchain.addBestBlock(newBestBlockD);
@@ -117,7 +117,7 @@ public class AbstractBlockchainTest {
     @Test
     public void addBlockToTheTipOfTheBlockchain() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
 
         Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
         testBlockchain.addBestBlock(newBestBlockD);
@@ -137,7 +137,7 @@ public class AbstractBlockchainTest {
     @Test
     public void addNewBestBlockAtLowerHeight() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
 
         Block newBestBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
         testBlockchain.addBestBlock(newBestBlockB);
@@ -157,7 +157,7 @@ public class AbstractBlockchainTest {
     @Test
     public void addNewBestBlockAndItsBranchToTheTipOfTheBlockchain() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchain testBlockchain = new AbstractBlockchain(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
 
         Block newBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
         when(realBlockchain.getBlockByHash(newBlockB.getHash().getBytes())).thenReturn(newBlockB);
