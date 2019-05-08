@@ -251,17 +251,18 @@ public class TransactionModuleTest {
         return args;
     }
 
-    private Web3Impl createEnvironment(BlockChainImpl blockchain, ReceiptStore receiptStore, Repository repository, TransactionPool transactionPool, BlockStore blockStore, boolean mineInstant) {
+    private Web3Impl createEnvironment(Blockchain blockchain, ReceiptStore receiptStore, Repository repository, TransactionPool transactionPool, BlockStore blockStore, boolean mineInstant) {
 
         ConfigCapabilities configCapabilities = new SimpleConfigCapabilities();
         CompositeEthereumListener compositeEthereumListener = new CompositeEthereumListener();
         Ethereum eth = new EthereumImpl(new ChannelManagerImpl(config, new SyncPool(compositeEthereumListener, blockchain, config, null)), transactionPool, compositeEthereumListener, blockchain);
         MinerClock minerClock = new MinerClock(true, Clock.systemUTC());
+        AbstractBlockchain miningAbstractBlockchain = new AbstractBlockchainImpl(blockchain, 449);
 
         MinerServer minerServer = new MinerServerImpl(
                 config,
                 eth,
-                blockchain,
+                miningAbstractBlockchain,
                 null,
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 new BlockToMineBuilder(

@@ -55,6 +55,7 @@ public class Web3ImplSnapshotTest {
     private static final TestSystemProperties config = new TestSystemProperties();
     private RskTestFactory factory;
     private Blockchain blockchain;
+    private AbstractBlockchain miningAbstractBlockchain;
     private BlockFactory blockFactory;
     private StateRootHandler stateRootHandler;
 
@@ -62,6 +63,7 @@ public class Web3ImplSnapshotTest {
     public void setUp() {
         factory = new RskTestFactory(config);
         blockchain = factory.getBlockchain();
+        miningAbstractBlockchain = factory.getMiningAbstractBlockchain();
         blockFactory = factory.getBlockFactory();
         stateRootHandler = factory.getStateRootHandler();
     }
@@ -203,7 +205,7 @@ public class Web3ImplSnapshotTest {
         return new MinerServerImpl(
                 config,
                 ethereum,
-                blockchain,
+                miningAbstractBlockchain,
                 factory.getNodeBlockProcessor(),
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 new BlockToMineBuilder(

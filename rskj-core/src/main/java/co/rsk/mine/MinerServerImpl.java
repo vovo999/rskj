@@ -66,7 +66,7 @@ public class MinerServerImpl implements MinerServer {
     private static final int CACHE_SIZE = 20;
 
     private final Ethereum ethereum;
-    private final Blockchain blockchain;
+    private final AbstractBlockchain blockchain;
     private final ProofOfWorkRule powRule;
     private final BlockToMineBuilder builder;
     private final BlockchainNetConfig blockchainConfig;
@@ -101,7 +101,7 @@ public class MinerServerImpl implements MinerServer {
     public MinerServerImpl(
             RskSystemProperties config,
             Ethereum ethereum,
-            Blockchain blockchain,
+            AbstractBlockchain blockchain,
             BlockProcessor nodeBlockProcessor,
             ProofOfWorkRule powRule,
             BlockToMineBuilder builder,
@@ -388,7 +388,7 @@ public class MinerServerImpl implements MinerServer {
         // See BlockChainImpl.calclBloom() if blocks has txs
         if (createCompetitiveBlock) {
             // Just for testing, mine on top of bestblock's parent
-            newBlockParent = blockchain.getBlockByHash(newBlockParent.getParentHash().getBytes());
+            newBlockParent = blockchain.getBlockByHash(newBlockParent.getParentHash());
         }
 
         logger.info("Starting block to mine from parent {} {}", newBlockParent.getNumber(), newBlockParent.getHash());

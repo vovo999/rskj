@@ -48,6 +48,7 @@ public class MinerManagerTest {
 
     private static final TestSystemProperties config = new TestSystemProperties();
     private Blockchain blockchain;
+    private AbstractBlockchain miningAbstractBlockchain;
     private TransactionPool transactionPool;
     private Repository repository;
     private BlockStore blockStore;
@@ -58,6 +59,7 @@ public class MinerManagerTest {
     public void setup() {
         RskTestFactory factory = new RskTestFactory(config);
         blockchain = factory.getBlockchain();
+        miningAbstractBlockchain = factory.getMiningAbstractBlockchain();
         transactionPool = factory.getTransactionPool();
         repository = factory.getRepository();
         blockStore = factory.getBlockStore();
@@ -269,7 +271,7 @@ public class MinerManagerTest {
         return new MinerServerImpl(
                 config,
                 ethereum,
-                blockchain,
+                miningAbstractBlockchain,
                 null,
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 new BlockToMineBuilder(
