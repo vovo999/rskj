@@ -19,11 +19,17 @@ class SnappyMetricsPlay implements Callable<Void> {
     @CommandLine.Option(names = {"-t", "--times"}, description = "Times to run experiment")
     private int times = 100;
 
+    @CommandLine.Option(names = {"-v", "--values"}, description = "Quantity of blocks to r/w")
+    private int value_to_generate = 3000;
+
     @CommandLine.Option(names = {"-sp", "--snappy"}, description = "Use snappy or not")
     private boolean useSnappy = false;
 
     @CommandLine.Option(names = {"-rw", "--readwrite"}, description = "Read/Write (true/false)")
     private boolean rW = true;
+
+    @CommandLine.Option(names = {"-sd", "--seed"}, description = "Seed")
+    private int seed = 100;
 
     public static void main(String[] args){
         CommandLine.call(new SnappyMetricsPlay(), args);
@@ -32,8 +38,8 @@ class SnappyMetricsPlay implements Callable<Void> {
 
     @Override
     public Void call() {
-        SnappyMetrics sMetrics = new SnappyMetrics(new RskContext(new String[0]), snappyBlockchainDir, normalBlockchainDir, useSnappy, rW);
-        sMetrics.runExperiment(times);
+        SnappyMetrics sMetrics = new SnappyMetrics(new RskContext(new String[0]), snappyBlockchainDir, normalBlockchainDir, useSnappy, rW, seed);
+        sMetrics.runExperiment(times, value_to_generate);
         System.gc();
         return null;
     }

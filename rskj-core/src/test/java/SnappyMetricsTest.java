@@ -12,8 +12,8 @@ public class SnappyMetricsTest {
         String [] args = new String[] {"/home/julian/.rsk/mainnet-snappy", "/home/julian/.rsk/mainnet-test"};
         String[] nodeCliArgs = Arrays.copyOf(args, args.length - 1);
         RskContext objects = new RskContext(nodeCliArgs);
-        SnappyMetrics sMetrics = new SnappyMetrics(objects, args[0], args[1], true, true);
-        sMetrics.runExperiment(50);
+        SnappyMetrics sMetrics = new SnappyMetrics(objects, args[0], args[1], true, true, 100);
+        sMetrics.runExperiment(50, 3000);
     }
 
 }
