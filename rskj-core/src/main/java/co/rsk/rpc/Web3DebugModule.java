@@ -20,7 +20,6 @@ package co.rsk.rpc;
 
 import co.rsk.rpc.modules.debug.DebugModule;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.ethereum.rpc.dto.TransactionReceiptDTO;
 
 public interface Web3DebugModule {
 

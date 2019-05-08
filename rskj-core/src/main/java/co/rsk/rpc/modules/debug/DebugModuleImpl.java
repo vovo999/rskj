@@ -28,7 +28,6 @@ import org.ethereum.db.BlockStore;
 import org.ethereum.db.ReceiptStore;
 import org.ethereum.db.TransactionInfo;
 import org.ethereum.rpc.TypeConverter;
-import org.ethereum.rpc.dto.TransactionReceiptDTO;
 import org.ethereum.vm.trace.MemoryProgramTraceProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
