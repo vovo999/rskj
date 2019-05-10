@@ -23,7 +23,7 @@ import co.rsk.config.RemascConfig;
 import co.rsk.config.RemascConfigFactory;
 import co.rsk.config.RskSystemProperties;
 import co.rsk.core.RskAddress;
-import co.rsk.pcc.bto.BTOUtils;
+import co.rsk.pcc.bto.HDWalletUtils;
 import co.rsk.peg.Bridge;
 import co.rsk.peg.SamplePrecompiledContract;
 import co.rsk.remasc.RemascContract;
@@ -124,7 +124,7 @@ public class PrecompiledContracts {
             return new RemascContract(REMASC_ADDR, remascConfig, config.getNetworkConstants(), config.getActivationConfig());
         }
         if (blockchainConfig.isRskip106() && address.equals(BTOUTILS_ADDR_DW)) {
-            return new BTOUtils(config, BTOUTILS_ADDR);
+            return new HDWalletUtils(config, BTOUTILS_ADDR);
         }
 
         return null;

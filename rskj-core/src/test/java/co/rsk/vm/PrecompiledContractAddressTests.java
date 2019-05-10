@@ -58,7 +58,7 @@ public class PrecompiledContractAddressTests {
         //checkAddr(pcList,SAMPLE_ADDR_STR ,"SamplePrecompiledContract");
         checkAddr(pcList,BRIDGE_ADDR_STR ,"Bridge");
         checkAddr(pcList,REMASC_ADDR_STR ,"RemascContract");
-        checkAddr(pcList,BTOUTILS_ADDR_STR,"BTOUtils");
+        checkAddr(pcList,BTOUTILS_ADDR_STR,"HDWalletUtils");
     }
 
     void checkAddr(PrecompiledContracts pcList,String addr,String className) {

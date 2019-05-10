@@ -19,10 +19,9 @@
 package co.rsk.vm;
 
 import co.rsk.config.TestSystemProperties;
-import co.rsk.pcc.bto.BTOUtils;
+import co.rsk.pcc.bto.HDWalletUtils;
 import co.rsk.peg.Bridge;
 import org.ethereum.config.BlockchainConfig;
-import org.ethereum.config.BlockchainNetConfig;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.PrecompiledContracts;
 import org.ethereum.vm.PrecompiledContracts.PrecompiledContract;
@@ -77,8 +76,8 @@ public class PrecompiledContractTest {
 
         Assert.assertNotNull(btoUtils1);
         Assert.assertNotNull(btoUtils2);
-        Assert.assertEquals(BTOUtils.class, btoUtils1.getClass());
-        Assert.assertEquals(BTOUtils.class, btoUtils2.getClass());
+        Assert.assertEquals(HDWalletUtils.class, btoUtils1.getClass());
+        Assert.assertEquals(HDWalletUtils.class, btoUtils2.getClass());
         Assert.assertNotSame(btoUtils1, btoUtils2);
     }
 }
