@@ -21,8 +21,8 @@ package org.ethereum.rpc;
 import co.rsk.config.TestSystemProperties;
 import co.rsk.core.Wallet;
 import co.rsk.core.WalletFactory;
-import co.rsk.mine.AbstractBlockchain;
-import co.rsk.mine.AbstractBlockchainImpl;
+import co.rsk.mine.MainchainView;
+import co.rsk.mine.MainchainViewImpl;
 import co.rsk.net.NodeID;
 import co.rsk.rpc.ExecutionBlockRetriever;
 import co.rsk.rpc.Web3RskImpl;
@@ -354,7 +354,7 @@ public class Web3ImplScoringTest {
 
         World world = new World();
         rsk.blockchain = world.getBlockChain();
-        AbstractBlockchain blockchain = new AbstractBlockchainImpl(rsk, world.getBlockChain(), 2);
+        MainchainView blockchain = new MainchainViewImpl(rsk, world.getBlockChain(), 2);
 
         Wallet wallet = WalletFactory.createWallet();
         TestSystemProperties config = new TestSystemProperties();

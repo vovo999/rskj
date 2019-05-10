@@ -66,7 +66,7 @@ public class MinerServerImpl implements MinerServer {
     private static final int CACHE_SIZE = 20;
 
     private final Ethereum ethereum;
-    private final AbstractBlockchain blockchain;
+    private final MainchainView blockchain;
     private final ProofOfWorkRule powRule;
     private final BlockToMineBuilder builder;
     private final BlockchainNetConfig blockchainConfig;
@@ -101,7 +101,7 @@ public class MinerServerImpl implements MinerServer {
     public MinerServerImpl(
             RskSystemProperties config,
             Ethereum ethereum,
-            AbstractBlockchain blockchain,
+            MainchainView blockchain,
             BlockProcessor nodeBlockProcessor,
             ProofOfWorkRule powRule,
             BlockToMineBuilder builder,

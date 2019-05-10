@@ -23,8 +23,8 @@ import co.rsk.config.TestSystemProperties;
 import co.rsk.core.*;
 import co.rsk.core.bc.BlockChainImpl;
 import co.rsk.core.bc.TransactionPoolImpl;
-import co.rsk.mine.AbstractBlockchain;
-import co.rsk.mine.AbstractBlockchainImpl;
+import co.rsk.mine.MainchainView;
+import co.rsk.mine.MainchainViewImpl;
 import co.rsk.mine.MinerClient;
 import co.rsk.mine.MinerServer;
 import co.rsk.net.BlockProcessor;
@@ -1248,10 +1248,10 @@ public class Web3ImplTest {
     private Web3Impl createWeb3(SimpleEthereum eth, PeerServer peerServer) {
         wallet = WalletFactory.createWallet();
         Blockchain blockchain = Web3Mocks.getMockBlockchain();
-        AbstractBlockchain miningBlockchain = new AbstractBlockchainImpl(eth, blockchain, 449);
+        MainchainView mainchainView = new MainchainViewImpl(eth, blockchain, 449);
         TransactionPool transactionPool = Web3Mocks.getMockTransactionPool();
         PersonalModuleWalletEnabled personalModule = new PersonalModuleWalletEnabled(config, eth, wallet, null);
-        EthModule ethModule = new EthModule(config, blockchain, null, new ExecutionBlockRetriever(miningBlockchain, null, null), new EthModuleSolidityDisabled(), new EthModuleWalletEnabled(wallet), null);
+        EthModule ethModule = new EthModule(config, blockchain, null, new ExecutionBlockRetriever(mainchainView, null, null), new EthModuleSolidityDisabled(), new EthModuleWalletEnabled(wallet), null);
         TxPoolModule txPoolModule = new TxPoolModuleImpl(Web3Mocks.getMockTransactionPool());
         DebugModule debugModule = new DebugModuleImpl(Web3Mocks.getMockMessageHandler());
         MinerClient minerClient = new SimpleMinerClient();
@@ -1301,7 +1301,7 @@ public class Web3ImplTest {
     }
 
     private Web3Impl createWeb3(Ethereum eth, Blockchain blockchain, TransactionPool transactionPool, BlockStore blockStore, BlockProcessor nodeBlockProcessor, ConfigCapabilities configCapabilities, ReceiptStore receiptStore) {
-        AbstractBlockchain blockchainMock = mock(AbstractBlockchain.class);
+        MainchainView blockchainMock = mock(MainchainView.class);
         Block bestBlock = blockchain.getBestBlock();
         when(blockchainMock.getBestBlock()).thenReturn(bestBlock);
 

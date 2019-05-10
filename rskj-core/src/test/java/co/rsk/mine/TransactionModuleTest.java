@@ -129,7 +129,7 @@ public class TransactionModuleTest {
         World world = new World(receiptStore);
         BlockChainImpl blockchain = world.getBlockChain();
 
-        AbstractBlockchain miningBlockchain = new AbstractBlockchainImpl(mock(Ethereum.class), blockchain, 1);
+        MainchainView mainchainView = new MainchainViewImpl(mock(Ethereum.class), blockchain, 1);
 
         Repository repository = blockchain.getRepository();
 
@@ -137,14 +137,14 @@ public class TransactionModuleTest {
 
         TransactionPool transactionPool = new TransactionPoolImpl(config, repository, blockStore, receiptStore, blockFactory, null, null, 10, 100);
 
-        Web3Impl web3 = createEnvironment(blockchain, miningBlockchain, receiptStore, repository, transactionPool, blockStore, true);
+        Web3Impl web3 = createEnvironment(blockchain, mainchainView, receiptStore, repository, transactionPool, blockStore, true);
 
         for (int i = 1; i < 100; i++) {
             String tx = sendTransaction(web3, repository);
             // The goal of this test is transaction testing and not block mining testing
             // Hence, there is no setup for listeners and best blocks must be added manually
             // to mainchain view object that is used by miner server to build new blocks.
-            miningBlockchain.addBestBlock(blockchain.getBestBlock());
+            mainchainView.addBestBlock(blockchain.getBestBlock());
             Transaction txInBlock = getTransactionFromBlockWhichWasSend(blockchain, tx);
 
             Assert.assertEquals(i, blockchain.getBestBlock().getNumber());
@@ -265,7 +265,7 @@ public class TransactionModuleTest {
                                        BlockStore blockStore,
                                        boolean mineInstant) {
         return createEnvironment(blockchain,
-                new AbstractBlockchainImpl(mock(Ethereum.class), blockchain, 1),
+                new MainchainViewImpl(mock(Ethereum.class), blockchain, 1),
                 receiptStore,
                 repository,
                 transactionPool,
@@ -273,7 +273,7 @@ public class TransactionModuleTest {
                 mineInstant);
     }
 
-    private Web3Impl createEnvironment(Blockchain blockchain, AbstractBlockchain miningBlockchain, ReceiptStore receiptStore, Repository repository, TransactionPool transactionPool, BlockStore blockStore, boolean mineInstant) {
+    private Web3Impl createEnvironment(Blockchain blockchain, MainchainView mainchainView, ReceiptStore receiptStore, Repository repository, TransactionPool transactionPool, BlockStore blockStore, boolean mineInstant) {
 
         ConfigCapabilities configCapabilities = new SimpleConfigCapabilities();
         CompositeEthereumListener compositeEthereumListener = new CompositeEthereumListener();
@@ -283,7 +283,7 @@ public class TransactionModuleTest {
         MinerServer minerServer = new MinerServerImpl(
                 config,
                 eth,
-                miningBlockchain,
+                mainchainView,
                 null,
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 new BlockToMineBuilder(
@@ -318,7 +318,7 @@ public class TransactionModuleTest {
             transactionModule = new EthModuleTransactionBase(config, wallet, transactionPool);
         }
 
-        EthModule ethModule = new EthModule(config, blockchain, reversibleTransactionExecutor1, new ExecutionBlockRetriever(miningBlockchain, null, null), new EthModuleSolidityDisabled(), new EthModuleWalletEnabled(wallet), transactionModule);
+        EthModule ethModule = new EthModule(config, blockchain, reversibleTransactionExecutor1, new ExecutionBlockRetriever(mainchainView, null, null), new EthModuleSolidityDisabled(), new EthModuleWalletEnabled(wallet), transactionModule);
         TxPoolModule txPoolModule = new TxPoolModuleImpl(transactionPool);
         DebugModule debugModule = new DebugModuleImpl(Web3Mocks.getMockMessageHandler());
 

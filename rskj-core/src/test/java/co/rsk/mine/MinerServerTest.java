@@ -60,7 +60,7 @@ import static org.junit.Assert.*;
 public class MinerServerTest extends ParameterizedNetworkUpgradeTest {
 
     private final DifficultyCalculator difficultyCalculator;
-    private AbstractBlockchain blockchain;
+    private MainchainView blockchain;
     private Repository repository;
     private BlockStore blockStore;
     private TransactionPool transactionPool;
@@ -75,7 +75,7 @@ public class MinerServerTest extends ParameterizedNetworkUpgradeTest {
     @Before
     public void setUp() {
         RskTestFactory factory = new RskTestFactory(config);
-        blockchain = factory.getMiningBlockchain();
+        blockchain = factory.getMainchainView();
         repository = factory.getRepository();
         blockStore = factory.getBlockStore();
         transactionPool = factory.getTransactionPool();

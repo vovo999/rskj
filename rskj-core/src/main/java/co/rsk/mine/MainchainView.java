@@ -22,7 +22,7 @@ import org.ethereum.core.Block;
 
 import java.util.List;
 
-public interface AbstractBlockchain {
+public interface MainchainView {
 
     void addBestBlock(Block bestBlock);
 

@@ -35,12 +35,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class AbstractBlockchainImplTest {
+public class MainchainViewImplTest {
 
     @Test
     public void creationIsCorrect() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 realBlockchain,
                 448);
@@ -64,7 +64,7 @@ public class AbstractBlockchainImplTest {
 
     @Test
     public void createWithLessBlocksThanMaxHeight() {
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 createBlockchain(10),
                 11);
@@ -77,7 +77,7 @@ public class AbstractBlockchainImplTest {
 
     @Test
     public void createWithBlocksEqualToMaxHeight() {
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 createBlockchain(4),
                 4);
@@ -90,7 +90,7 @@ public class AbstractBlockchainImplTest {
 
     @Test
     public void createWithMoreBlocksThanMaxHeight() {
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 createBlockchain(42),
                 6);
@@ -109,7 +109,7 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addBlockToTheTipOfTheBlockchainGettingOverMaxHeight() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 realBlockchain,
                 3);
@@ -133,7 +133,7 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addBlockToTheTipOfTheBlockchain() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 realBlockchain,
                 448);
@@ -156,7 +156,7 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addNewBestBlockAtLowerHeight() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 realBlockchain,
                 448);
@@ -179,7 +179,7 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addNewBestBlockAndItsBranchToTheTipOfTheBlockchain() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+        MainchainViewImpl testBlockchain = new MainchainViewImpl(
                 mock(Ethereum.class),
                 realBlockchain,
                 448);

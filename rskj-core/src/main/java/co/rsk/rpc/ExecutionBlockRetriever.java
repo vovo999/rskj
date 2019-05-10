@@ -18,7 +18,7 @@
 
 package co.rsk.rpc;
 
-import co.rsk.mine.AbstractBlockchain;
+import co.rsk.mine.MainchainView;
 import co.rsk.mine.BlockToMineBuilder;
 import co.rsk.mine.MinerServer;
 import org.ethereum.core.Block;
@@ -37,14 +37,14 @@ public class ExecutionBlockRetriever {
     private static final String LATEST_ID = "latest";
     private static final String PENDING_ID = "pending";
 
-    private final AbstractBlockchain blockchain;
+    private final MainchainView blockchain;
     private final MinerServer minerServer;
     private final BlockToMineBuilder builder;
 
     @Nullable
     private Block cachedBlock;
 
-    public ExecutionBlockRetriever(AbstractBlockchain blockchain,
+    public ExecutionBlockRetriever(MainchainView blockchain,
                                    MinerServer minerServer,
                                    BlockToMineBuilder builder) {
         this.blockchain = blockchain;

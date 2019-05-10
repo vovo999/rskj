@@ -35,7 +35,7 @@ import java.time.Clock;
  */
 public class MainNetMinerTest {
     private Blockchain blockchain;
-    private AbstractBlockchain miningBlockchain;
+    private MainchainView mainchainView;
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -53,7 +53,7 @@ public class MainNetMinerTest {
         config.setBlockchainConfig(new FallbackMainNetConfig());
         RskTestFactory factory = new RskTestFactory(config);
         blockchain = factory.getBlockchain();
-        miningBlockchain = factory.getMiningBlockchain();
+        mainchainView = factory.getMainchainView();
         transactionPool = factory.getTransactionPool();
         blockStore = factory.getBlockStore();
         blockProcessor = factory.getNodeBlockProcessor();
@@ -81,7 +81,7 @@ public class MainNetMinerTest {
         MinerServer minerServer = new MinerServerImpl(
                 config,
                 ethereumImpl,
-                miningBlockchain,
+                mainchainView,
                 null,
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 blockToMineBuilder(),
@@ -143,7 +143,7 @@ public class MainNetMinerTest {
         MinerServer minerServer = new MinerServerImpl(
                 config,
                 ethereumImpl,
-                miningBlockchain,
+                mainchainView,
                 blockProcessor,
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 blockToMineBuilder(),

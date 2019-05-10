@@ -27,12 +27,12 @@ import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class AbstractBlockchainImpl implements AbstractBlockchain {
+public class MainchainViewImpl implements MainchainView {
     private final Object internalBlockStoreReadWriteLock = new Object();
 
     private final int height;
 
-    private Blockchain realBlockchain;
+    private Blockchain blockchain;
 
     @GuardedBy("internalBlockStoreReadWriteLock")
     private Map<Keccak256, Block> blocksByHash;
@@ -41,16 +41,16 @@ public class AbstractBlockchainImpl implements AbstractBlockchain {
     private Map<Long, List<Block>> blocksByNumber;
 
     @GuardedBy("internalBlockStoreReadWriteLock")
-    private List<Block> blockchain;
+    private List<Block> mainchain;
 
-    public AbstractBlockchainImpl(Ethereum listeners,
-                                  Blockchain realBlockchain,
-                                  int height) {
+    public MainchainViewImpl(Ethereum listeners,
+                             Blockchain blockchain,
+                             int height) {
         this.height = height;
-        this.realBlockchain = realBlockchain;
+        this.blockchain = blockchain;
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
-        fillInternalsBlockStore(realBlockchain.getBestBlock());
+        fillInternalsBlockStore(blockchain.getBestBlock());
 
         listeners.addListener(new MainchainViewListener(this));
     }
@@ -69,14 +69,14 @@ public class AbstractBlockchainImpl implements AbstractBlockchain {
     @Override
     public List<Block> get() {
         synchronized (internalBlockStoreReadWriteLock) {
-            return blockchain;
+            return mainchain;
         }
     }
 
     @Override
     public Block getBestBlock() {
         synchronized (internalBlockStoreReadWriteLock) {
-            return blockchain.get(0);
+            return mainchain.get(0);
         }
     }
 
@@ -88,7 +88,7 @@ public class AbstractBlockchainImpl implements AbstractBlockchain {
             }
         }
 
-        return realBlockchain.getBlockByNumber(number);
+        return blockchain.getBlockByNumber(number);
     }
 
     private void fillInternalsBlockStore(Block bestBlock) {
@@ -105,10 +105,10 @@ public class AbstractBlockchainImpl implements AbstractBlockchain {
             if(currentBlock.isGenesis()) {
                 break;
             }
-            currentBlock = realBlockchain.getBlockByHash(currentBlock.getParentHash().getBytes());
+            currentBlock = blockchain.getBlockByHash(currentBlock.getParentHash().getBytes());
         }
 
-        blockchain = newBlockchain;
+        mainchain = newBlockchain;
     }
 
     private void addToBlockByNumberMap(Block blockToAdd) {

@@ -30,9 +30,9 @@ import java.util.List;
 public class MainchainViewListener extends EthereumListenerAdapter {
     private static final Logger logger = LoggerFactory.getLogger("mainchainviewlistener");
 
-    private AbstractBlockchain mainchainView;
+    private MainchainView mainchainView;
 
-    public MainchainViewListener(AbstractBlockchain mainchainView) {
+    public MainchainViewListener(MainchainView mainchainView) {
         this.mainchainView = mainchainView;
     }
 
