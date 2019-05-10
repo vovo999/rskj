@@ -26,6 +26,7 @@ import org.ethereum.core.TransactionPool;
 import org.ethereum.db.BlockStore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,7 +74,7 @@ public class SnapshotManager {
         }
 
         // start mining on top of the new best block
-        minerServer.buildBlockToMine(block, false);
+        minerServer.buildBlockToMine( false);
 
         return true;
     }
@@ -112,7 +113,7 @@ public class SnapshotManager {
         }
 
         // start mining on top of the new best block
-        minerServer.buildBlockToMine(block, false);
+        minerServer.buildBlockToMine( false);
 
         return true;
     }

@@ -170,7 +170,7 @@ public class MinerServerImpl implements MinerServer {
             started = true;
             blockListener = new NewBlockListener();
             ethereum.addListener(blockListener);
-            buildBlockToMine(blockchain.getBestBlock(), false);
+            buildBlockToMine(false);
 
             if (refreshWorkTimer != null) {
                 refreshWorkTimer.cancel();
@@ -378,22 +378,24 @@ public class MinerServerImpl implements MinerServer {
     }
 
     /**
-     * buildBlockToMine creates a block to mine based on the given block as parent.
+     * buildBlockToMine creates a block to mine using the current best block as parent.
+     * best block is obtained from a blockchain view that has the latest mainchain blocks.
      *
-     * @param newBlockParent         the new block parent.
      * @param createCompetitiveBlock used for testing.
      */
     @Override
-    public void buildBlockToMine(@Nonnull Block newBlockParent, boolean createCompetitiveBlock) {
+    public void buildBlockToMine(boolean createCompetitiveBlock) {
+        List<Block> mainchainBlocks = blockchain.get();
+        Block newBlockParent = blockchain.getBestBlock();
         // See BlockChainImpl.calclBloom() if blocks has txs
         if (createCompetitiveBlock) {
-            // Just for testing, mine on top of bestblock's parent
-            newBlockParent = blockchain.getBlockByHash(newBlockParent.getParentHash());
+            // Just for testing, mine on top of best block's parent
+            newBlockParent = mainchainBlocks.get(1);
         }
 
         logger.info("Starting block to mine from parent {} {}", newBlockParent.getNumber(), newBlockParent.getHash());
 
-        final Block newBlock = builder.build(newBlockParent, extraData);
+        final Block newBlock = builder.build(mainchainBlocks, extraData);
         clock.clearIncreaseTime();
 
         synchronized (lock) {
@@ -470,7 +472,7 @@ public class MinerServerImpl implements MinerServer {
 
             if (!work.getParentBlockHash().equals(bestBlockHash)) {
                 logger.debug("There is a new best block: {}, number: {}", bestBlock.getShortHashForMergedMining(), bestBlock.getNumber());
-                buildBlockToMine(bestBlock, false);
+                buildBlockToMine(false);
             } else {
                 logger.debug("New block arrived but there is no need to build a new block to mine: {}", block.getShortHashForMergedMining());
             }
@@ -489,9 +491,8 @@ public class MinerServerImpl implements MinerServer {
     private class RefreshBlock extends TimerTask {
         @Override
         public void run() {
-            Block bestBlock = blockchain.getBestBlock();
             try {
-                buildBlockToMine(bestBlock, false);
+                buildBlockToMine(false);
             } catch (Throwable th) {
                 logger.error("Unexpected error: {}", th);
                 panicProcessor.panic("mserror", th.getMessage());

@@ -126,7 +126,7 @@ public class RskContext implements NodeBootstrapper {
 
     private RskSystemProperties rskSystemProperties;
     private Blockchain blockchain;
-    private AbstractBlockchain miningAbstractBlockchain;
+    private AbstractBlockchain miningBlockchain;
     private BlockFactory blockFactory;
     private BlockChainLoader blockChainLoader;
     private org.ethereum.db.BlockStore blockStore;
@@ -225,12 +225,12 @@ public class RskContext implements NodeBootstrapper {
         return blockchain;
     }
 
-    public AbstractBlockchain getMiningAbstractBlockchain() {
-        if (miningAbstractBlockchain == null) {
-            miningAbstractBlockchain = new AbstractBlockchainImpl(getBlockchain(), 449);
+    public AbstractBlockchain getMiningBlockchain() {
+        if (miningBlockchain == null) {
+            miningBlockchain = new AbstractBlockchainImpl(getBlockchain(), 449);
         }
 
-        return miningAbstractBlockchain;
+        return miningBlockchain;
     }
 
     public BlockFactory getBlockFactory() {
@@ -529,7 +529,7 @@ public class RskContext implements NodeBootstrapper {
             minerServer = new MinerServerImpl(
                     getRskSystemProperties(),
                     getRsk(),
-                    getMiningAbstractBlockchain(),
+                    getMiningBlockchain(),
                     getNodeBlockProcessor(),
                     getProofOfWorkRule(),
                     getBlockToMineBuilder(),
@@ -1263,7 +1263,7 @@ public class RskContext implements NodeBootstrapper {
     private ExecutionBlockRetriever getExecutionBlockRetriever() {
         if (executionBlockRetriever == null) {
             executionBlockRetriever = new ExecutionBlockRetriever(
-                    getBlockchain(),
+                    getMiningBlockchain(),
                     getMinerServer(),
                     getBlockToMineBuilder()
             );

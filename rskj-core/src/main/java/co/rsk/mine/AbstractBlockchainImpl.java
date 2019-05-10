@@ -69,21 +69,21 @@ public class AbstractBlockchainImpl implements AbstractBlockchain {
     }
 
     @Override
-    public Block getBlockByHash(Keccak256 hash) {
-        synchronized (internalBlockStoreReadWriteLock) {
-            if (blocksByHash.containsKey(hash)) {
-                return blocksByHash.get(hash);
-            }
-        }
-
-        return realBlockchain.getBlockByHash(hash.getBytes());
-    }
-
-    @Override
     public Block getBestBlock() {
         synchronized (internalBlockStoreReadWriteLock) {
             return blockchain.get(0);
         }
+    }
+
+    @Override
+    public Block getBlockByNumber(long number) {
+        synchronized (internalBlockStoreReadWriteLock) {
+            if (blocksByNumber.containsKey(number)) {
+                return blocksByHash.get(number);
+            }
+        }
+
+        return realBlockchain.getBlockByNumber(number);
     }
 
     private void fillInternalsBlockStore(Block bestBlock) {

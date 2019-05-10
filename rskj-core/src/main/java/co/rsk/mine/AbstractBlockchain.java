@@ -29,7 +29,7 @@ public interface AbstractBlockchain {
 
     List<Block> get();
 
-    Block getBlockByHash(Keccak256 hash);
-
     Block getBestBlock();
+
+    Block getBlockByNumber(long number);
 }

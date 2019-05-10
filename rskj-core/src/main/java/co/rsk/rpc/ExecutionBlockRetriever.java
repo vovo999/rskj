@@ -18,14 +18,15 @@
 
 package co.rsk.rpc;
 
+import co.rsk.mine.AbstractBlockchain;
 import co.rsk.mine.BlockToMineBuilder;
 import co.rsk.mine.MinerServer;
 import org.ethereum.core.Block;
-import org.ethereum.core.Blockchain;
 import org.ethereum.rpc.exception.JsonRpcInvalidParamException;
 import org.ethereum.util.Utils;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -36,14 +37,16 @@ public class ExecutionBlockRetriever {
     private static final String LATEST_ID = "latest";
     private static final String PENDING_ID = "pending";
 
-    private final Blockchain blockchain;
+    private final AbstractBlockchain blockchain;
     private final MinerServer minerServer;
     private final BlockToMineBuilder builder;
 
     @Nullable
     private Block cachedBlock;
 
-    public ExecutionBlockRetriever(Blockchain blockchain, MinerServer minerServer, BlockToMineBuilder builder) {
+    public ExecutionBlockRetriever(AbstractBlockchain blockchain,
+                                   MinerServer minerServer,
+                                   BlockToMineBuilder builder) {
         this.blockchain = blockchain;
         this.minerServer = minerServer;
         this.builder = builder;
@@ -62,7 +65,8 @@ public class ExecutionBlockRetriever {
 
             Block bestBlock = blockchain.getBestBlock();
             if (cachedBlock == null || !bestBlock.isParentOf(cachedBlock)) {
-                cachedBlock = builder.build(bestBlock, null);
+                List<Block> mainchainBlocks = blockchain.get();
+                cachedBlock = builder.build(mainchainBlocks, null);
             }
 
             return cachedBlock;

@@ -24,6 +24,7 @@ import co.rsk.core.Rsk;
 import co.rsk.core.Wallet;
 import co.rsk.core.WalletFactory;
 import co.rsk.logfilter.BlocksBloomStore;
+import co.rsk.mine.AbstractBlockchain;
 import co.rsk.rpc.ExecutionBlockRetriever;
 import co.rsk.rpc.Web3RskImpl;
 import co.rsk.rpc.modules.debug.DebugModule;
@@ -87,6 +88,7 @@ public class Web3ImplLogsTest {
     private final static String GET_VALUE_METHOD_SIGNATURE = "20965255";
     private final TestSystemProperties config = new TestSystemProperties();
     private Blockchain blockChain;
+    private AbstractBlockchain miningBlockchain;
     private TransactionPool transactionPool;
     private Rsk eth;
     private ReceiptStore receiptStore;
@@ -99,6 +101,7 @@ public class Web3ImplLogsTest {
     public void setUp() {
         RskTestFactory factory = new RskTestFactory();
         blockChain = factory.getBlockchain();
+        miningBlockchain = factory.getMiningBlockchain();
         transactionPool = factory.getTransactionPool();
         eth = factory.getRsk();
         receiptStore = factory.getReceiptStore();
@@ -941,7 +944,7 @@ public class Web3ImplLogsTest {
     private Web3Impl createWeb3() {
         Wallet wallet = WalletFactory.createWallet();
         PersonalModule personalModule = new PersonalModuleWalletEnabled(config, eth, wallet, transactionPool);
-        EthModule ethModule = new EthModule(config, blockChain, null, new ExecutionBlockRetriever(blockChain, null, null), new EthModuleSolidityDisabled(), new EthModuleWalletEnabled(wallet), null);
+        EthModule ethModule = new EthModule(config, blockChain, null, new ExecutionBlockRetriever(miningBlockchain, null, null), new EthModuleSolidityDisabled(), new EthModuleWalletEnabled(wallet), null);
         TxPoolModule txPoolModule = new TxPoolModuleImpl(transactionPool);
         DebugModule debugModule = new DebugModuleImpl(Web3Mocks.getMockMessageHandler());
         return new Web3RskImpl(

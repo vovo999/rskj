@@ -48,7 +48,7 @@ public class MinerManagerTest {
 
     private static final TestSystemProperties config = new TestSystemProperties();
     private Blockchain blockchain;
-    private AbstractBlockchain miningAbstractBlockchain;
+    private AbstractBlockchain miningBlockchain;
     private TransactionPool transactionPool;
     private Repository repository;
     private BlockStore blockStore;
@@ -59,7 +59,7 @@ public class MinerManagerTest {
     public void setup() {
         RskTestFactory factory = new RskTestFactory(config);
         blockchain = factory.getBlockchain();
-        miningAbstractBlockchain = factory.getMiningAbstractBlockchain();
+        miningBlockchain = factory.getMiningBlockchain();
         transactionPool = factory.getTransactionPool();
         repository = factory.getRepository();
         blockStore = factory.getBlockStore();
@@ -78,7 +78,7 @@ public class MinerManagerTest {
 
         Assert.assertNotNull(refreshWork);
         try {
-            minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+            minerServer.buildBlockToMine(false);
             refreshWork.run();
             Assert.assertTrue(minerClient.mineBlock());
 
@@ -99,12 +99,15 @@ public class MinerManagerTest {
 
         Assert.assertNotNull(refreshWork);
         try {
-            minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+            minerServer.buildBlockToMine( false);
             refreshWork.run();
 
             Assert.assertTrue(minerClient.mineBlock());
 
-            minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+            //TODO(mmedina): change this once mining blockchain has its own on best block listener
+            miningBlockchain.addBestBlock(blockchain.getBestBlock());
+
+            minerServer.buildBlockToMine( false);
             refreshWork.run();
             Assert.assertTrue(minerClient.mineBlock());
 
@@ -121,7 +124,7 @@ public class MinerManagerTest {
         MinerServerImpl minerServer = getMinerServer();
         MinerClientImpl minerClient = getMinerClient(minerServer);
 
-        minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+        minerServer.buildBlockToMine( false);
 
         MinerWork minerWork = minerServer.getWork();
 
@@ -159,7 +162,7 @@ public class MinerManagerTest {
         MinerServerImpl minerServer = getMinerServer();
         MinerClientImpl minerClient = getMinerClient(rsk, minerServer);
 
-        minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+        minerServer.buildBlockToMine( false);
 
         Assert.assertFalse(minerClient.mineBlock());
 
@@ -173,7 +176,7 @@ public class MinerManagerTest {
         MinerServerImpl minerServer = getMinerServer();
         MinerClientImpl minerClient = getMinerClient(minerServer);
 
-        minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+        minerServer.buildBlockToMine( false);
         minerClient.doWork();
 
         Assert.assertEquals(1, blockchain.getBestBlock().getNumber());
@@ -186,7 +189,7 @@ public class MinerManagerTest {
         MinerServerImpl minerServer = getMinerServer();
         MinerClientImpl minerClient = getMinerClient(null);
 
-        minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+        minerServer.buildBlockToMine(false);
         minerClient.doWork();
 
         Assert.assertEquals(0, blockchain.getBestBlock().getNumber());
@@ -199,7 +202,7 @@ public class MinerManagerTest {
         MinerServerImpl minerServer = getMinerServer();
         MinerClientImpl minerClient = getMinerClient(minerServer);
 
-        minerServer.buildBlockToMine(blockchain.getBestBlock(), false);
+        minerServer.buildBlockToMine(false);
         Thread thread = minerClient.createDoWorkThread();
         thread.start();
         try {
@@ -238,6 +241,8 @@ public class MinerManagerTest {
         Assert.assertEquals(0, blockchain.getBestBlock().getNumber());
 
         manager.mineBlock(blockchain, minerClient, minerServer);
+        //TODO(mmedina): change this once mining blockchain has its own on best block listener
+        miningBlockchain.addBestBlock(blockchain.getBestBlock());
         manager.mineBlock(blockchain, minerClient, minerServer);
         Assert.assertEquals(2, blockchain.getBestBlock().getNumber());
 
@@ -271,7 +276,7 @@ public class MinerManagerTest {
         return new MinerServerImpl(
                 config,
                 ethereum,
-                miningAbstractBlockchain,
+                miningBlockchain,
                 null,
                 new ProofOfWorkRule(config).setFallbackMiningEnabled(false),
                 new BlockToMineBuilder(

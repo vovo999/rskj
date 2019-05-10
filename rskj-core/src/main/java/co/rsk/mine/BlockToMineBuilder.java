@@ -120,10 +120,11 @@ public class BlockToMineBuilder {
     /**
      * build creates a block to mine based on the given block as parent.
      *
-     * @param newBlockParent the new block parent.
-     * @param extraData      extra data to pass to the block being built
+     * @param mainchainBlocks   mainchain last blocks where 0 is the best block and so on.
+     * @param extraData         extra data to pass to the block being built.
      */
-    public Block build(Block newBlockParent, byte[] extraData) {
+    public Block build(List<Block> mainchainBlocks, byte[] extraData) {
+        Block newBlockParent = mainchainBlocks.get(0);
         List<BlockHeader> uncles = FamilyUtils.getUnclesHeaders(
                 blockStore,
                 newBlockParent.getNumber() + 1,
