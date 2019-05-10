@@ -22,6 +22,8 @@ import co.rsk.config.ConfigUtils;
 import co.rsk.config.TestSystemProperties;
 import co.rsk.core.*;
 import co.rsk.core.bc.BlockChainImpl;
+import co.rsk.core.bc.MainchainView;
+import co.rsk.core.bc.MainchainViewImpl;
 import co.rsk.core.bc.TransactionPoolImpl;
 import co.rsk.db.StateRootHandler;
 import co.rsk.rpc.ExecutionBlockRetriever;

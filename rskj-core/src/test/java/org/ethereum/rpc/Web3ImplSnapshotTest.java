@@ -23,6 +23,7 @@ import co.rsk.config.ConfigUtils;
 import co.rsk.config.TestSystemProperties;
 import co.rsk.core.DifficultyCalculator;
 import co.rsk.core.bc.BlockChainStatus;
+import co.rsk.core.bc.MainchainView;
 import co.rsk.db.StateRootHandler;
 import co.rsk.mine.*;
 import co.rsk.rpc.modules.debug.DebugModule;

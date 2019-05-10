@@ -25,6 +25,7 @@ import co.rsk.config.RskMiningConstants;
 import co.rsk.config.RskSystemProperties;
 import co.rsk.core.Coin;
 import co.rsk.core.RskAddress;
+import co.rsk.core.bc.MainchainView;
 import co.rsk.crypto.Keccak256;
 import co.rsk.net.BlockProcessor;
 import co.rsk.panic.PanicProcessor;

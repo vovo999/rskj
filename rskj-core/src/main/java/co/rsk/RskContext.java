@@ -22,6 +22,8 @@ import co.rsk.cli.CliArgs;
 import co.rsk.config.*;
 import co.rsk.core.*;
 import co.rsk.core.bc.BlockValidatorImpl;
+import co.rsk.core.bc.MainchainView;
+import co.rsk.core.bc.MainchainViewImpl;
 import co.rsk.core.bc.TransactionPoolImpl;
 import co.rsk.crypto.Keccak256;
 import co.rsk.db.RepositoryImpl;

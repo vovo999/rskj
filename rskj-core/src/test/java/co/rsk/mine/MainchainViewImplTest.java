@@ -18,6 +18,7 @@
 
 package co.rsk.mine;
 
+import co.rsk.core.bc.MainchainViewImpl;
 import co.rsk.crypto.Keccak256;
 import org.ethereum.core.Block;
 import org.ethereum.core.Blockchain;

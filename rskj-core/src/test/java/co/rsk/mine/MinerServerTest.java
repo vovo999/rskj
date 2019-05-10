@@ -25,6 +25,7 @@ import co.rsk.config.ConfigUtils;
 import co.rsk.config.TestSystemProperties;
 import co.rsk.core.Coin;
 import co.rsk.core.DifficultyCalculator;
+import co.rsk.core.bc.MainchainView;
 import co.rsk.crypto.Keccak256;
 import co.rsk.db.StateRootHandler;
 import co.rsk.remasc.RemascTransaction;

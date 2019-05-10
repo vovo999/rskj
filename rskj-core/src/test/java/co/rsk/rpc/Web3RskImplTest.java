@@ -24,7 +24,7 @@ import co.rsk.core.Rsk;
 import co.rsk.core.Wallet;
 import co.rsk.core.WalletFactory;
 import co.rsk.crypto.Keccak256;
-import co.rsk.mine.MainchainView;
+import co.rsk.core.bc.MainchainView;
 import co.rsk.peg.PegTestUtils;
 import co.rsk.rpc.modules.debug.DebugModule;
 import co.rsk.rpc.modules.debug.DebugModuleImpl;

@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package co.rsk.mine;
+package co.rsk.core.bc;
 
 import org.ethereum.core.Block;
 

@@ -16,8 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package co.rsk.mine;
+package co.rsk.listeners;
 
+import co.rsk.core.bc.MainchainView;
 import org.ethereum.core.Block;
 import org.ethereum.core.TransactionReceipt;
 import org.ethereum.listener.EthereumListenerAdapter;

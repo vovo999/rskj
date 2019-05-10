@@ -18,7 +18,7 @@
 
 package co.rsk.rpc;
 
-import co.rsk.mine.MainchainView;
+import co.rsk.core.bc.MainchainView;
 import co.rsk.mine.BlockToMineBuilder;
 import co.rsk.mine.MinerServer;
 import org.ethereum.core.Block;
