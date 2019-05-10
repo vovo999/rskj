@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class ForkDetectionDataBuilder {
+public class ForkDetectionDataCalculator {
 
     private static final int CPV_SIZE = 7;
 
@@ -35,13 +35,7 @@ public class ForkDetectionDataBuilder {
 
     private static final int NUMBER_OF_UNCLES = 32;
 
-    private final List<Block> mainchainBlocks;
-
-    ForkDetectionDataBuilder(List<Block> mainchainBlocks) {
-        this.mainchainBlocks = mainchainBlocks;
-    }
-
-    public byte[] build() {
+    public byte[] calculate(List<Block> mainchainBlocks) {
         // + 1 because genesis block can't be used since it does not contain a valid BTC header
         if (mainchainBlocks.size() < CPV_SIZE * CPV_JUMP_FACTOR + 1) {
             return new byte[0];
@@ -49,19 +43,19 @@ public class ForkDetectionDataBuilder {
 
         byte[] forkDetectionData = new byte[12];
 
-        byte[] commitToParentsVector = buildCommitToParentsVector();
+        byte[] commitToParentsVector = buildCommitToParentsVector(mainchainBlocks);
         System.arraycopy(commitToParentsVector, 0, forkDetectionData, 0, 7);
 
-        short numberOfUncles = getNumberOfUncles();
+        short numberOfUncles = getNumberOfUncles(mainchainBlocks);
         forkDetectionData[7] = ByteBuffer.allocate(2).putShort(numberOfUncles).array()[1];
 
-        byte[] blockBeingMinedHeight = getBlockBeingMinedHeight();
+        byte[] blockBeingMinedHeight = getBlockBeingMinedHeight(mainchainBlocks);
         System.arraycopy(blockBeingMinedHeight, 0, forkDetectionData, 8, 4);
 
         return forkDetectionData;
     }
 
-    private byte[] buildCommitToParentsVector() {
+    private byte[] buildCommitToParentsVector(List<Block> mainchainBlocks) {
         NetworkParameters params = RegTestParams.get();
         new Context(params);
 
@@ -91,7 +85,7 @@ public class ForkDetectionDataBuilder {
         return number % 64 == 0;
     }
 
-    private short getNumberOfUncles() {
+    private short getNumberOfUncles(List<Block> mainchainBlocks) {
         // int to short is a safe cast since number of uncles is max 7 and blocks evaluated are at most 32.
         // Hence, 7 * 32 = 224 and 224 < 255 (max number that fits on a short type variable)
         return (short)IntStream
@@ -99,7 +93,7 @@ public class ForkDetectionDataBuilder {
                 .map(i -> mainchainBlocks.get(i).getUncleList().size()).sum();
     }
 
-    private byte[] getBlockBeingMinedHeight() {
+    private byte[] getBlockBeingMinedHeight(List<Block> mainchainBlocks) {
         long blockBeingMinedHeight = mainchainBlocks.get(0).getNumber() + 1;
         return ByteBuffer.allocate(4).putInt((int)blockBeingMinedHeight).array();
     }

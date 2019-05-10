@@ -35,21 +35,20 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 
-public class ForkDataDetectionBuilderTest {
+public class ForkDataDetectionCalculatorTest {
 
     @Test
-    public void buildWithMinPossibleBlockchainHeight() {
+    public void calculateWithMinPossibleBlockchainHeight() {
         List<Block> lastBlockchainBlocks = createBlockchainAsList(449);
 
-        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(lastBlockchainBlocks);
+        ForkDetectionDataCalculator builder = new ForkDetectionDataCalculator();
 
-        byte[] forkDetectionData = builder.build();
+        byte[] forkDetectionData = builder.calculate(lastBlockchainBlocks);
 
         assertThat(forkDetectionData.length, is(12));
 
@@ -77,24 +76,24 @@ public class ForkDataDetectionBuilderTest {
     }
 
     @Test
-    public void buildReturnsEmptyWhenNotEnoughBlocks() {
+    public void calculateReturnsEmptyWhenNotEnoughBlocks() {
         List<Block> lastBlockchainBlocks = createBlockchainAsList(250);
 
-        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(lastBlockchainBlocks);
+        ForkDetectionDataCalculator builder = new ForkDetectionDataCalculator();
 
-        byte[] forkDetectionData = builder.build();
+        byte[] forkDetectionData = builder.calculate(lastBlockchainBlocks);
 
         assertThat(forkDetectionData.length, is(0));
     }
 
     @Test
-    public void buildWithDivisibleBy64height() {
+    public void calculateWithDivisibleBy64height() {
         List<Block> lastBlockchainBlocks = createBlockchainAsList(512);
         List<Block> trimmedBlocks = lastBlockchainBlocks.subList(0, 449);
 
-        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(trimmedBlocks);
+        ForkDetectionDataCalculator builder = new ForkDetectionDataCalculator();
 
-        byte[] forkDetectionData = builder.build();
+        byte[] forkDetectionData = builder.calculate(trimmedBlocks);
 
         assertThat(forkDetectionData.length, is(12));
 
@@ -122,13 +121,13 @@ public class ForkDataDetectionBuilderTest {
     }
 
     @Test
-    public void buildWithUnclesOnPreviousBlocks() {
+    public void calculateWithUnclesOnPreviousBlocks() {
         List<Block> lastBlockchainBlocks = createBlockchainWithUnclesAsList(512, false);
         List<Block> trimmedBlocks = lastBlockchainBlocks.subList(0, 449);
 
-        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(trimmedBlocks);
+        ForkDetectionDataCalculator builder = new ForkDetectionDataCalculator();
 
-        byte[] forkDetectionData = builder.build();
+        byte[] forkDetectionData = builder.calculate(trimmedBlocks);
 
         assertThat(forkDetectionData.length, is(12));
 
@@ -156,13 +155,13 @@ public class ForkDataDetectionBuilderTest {
     }
 
     @Test
-    public void buildWithMaxUnclesOnPreviousBlocks() {
+    public void calculateWithMaxUnclesOnPreviousBlocks() {
         List<Block> lastBlockchainBlocks = createBlockchainWithMaxUnclesAsList(564);
         List<Block> trimmedBlocks = lastBlockchainBlocks.subList(0, 449);
 
-        ForkDetectionDataBuilder builder = new ForkDetectionDataBuilder(trimmedBlocks);
+        ForkDetectionDataCalculator builder = new ForkDetectionDataCalculator();
 
-        byte[] forkDetectionData = builder.build();
+        byte[] forkDetectionData = builder.calculate(trimmedBlocks);
 
         assertThat(forkDetectionData.length, is(12));
 
