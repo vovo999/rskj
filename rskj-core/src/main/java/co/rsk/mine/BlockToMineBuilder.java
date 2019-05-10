@@ -66,6 +66,8 @@ public class BlockToMineBuilder {
 
     private final Coin minerMinGasPriceTarget;
 
+    private final ForkDetectionDataCalculator forkDetectionDataCalculator;
+
     public BlockToMineBuilder(
             MiningConfig miningConfig,
             Repository repository,
@@ -115,16 +117,17 @@ public class BlockToMineBuilder {
         ), stateRootHandler);
 
         this.minerMinGasPriceTarget = Coin.valueOf(miningConfig.getMinGasPriceTarget());
+        this.forkDetectionDataCalculator = new ForkDetectionDataCalculator();
     }
 
     /**
      * build creates a block to mine based on the given block as parent.
      *
-     * @param mainchainBlocks   mainchain last blocks where 0 is the best block and so on.
-     * @param extraData         extra data to pass to the block being built.
+     * @param mainchain last best chain blocks where 0 index is the best block and so on.
+     * @param extraData extra data to pass to the block being built.
      */
-    public Block build(List<Block> mainchainBlocks, byte[] extraData) {
-        Block newBlockParent = mainchainBlocks.get(0);
+    public Block build(List<Block> mainchain, byte[] extraData) {
+        Block newBlockParent = mainchain.get(0);
         List<BlockHeader> uncles = FamilyUtils.getUnclesHeaders(
                 blockStore,
                 newBlockParent.getNumber() + 1,
@@ -144,7 +147,7 @@ public class BlockToMineBuilder {
 
         final List<Transaction> txsToRemove = new ArrayList<>();
         final List<Transaction> txs = getTransactions(txsToRemove, newBlockParent, minimumGasPrice);
-        final Block newBlock = createBlock(newBlockParent, uncles, txs, minimumGasPrice, extraData);
+        final Block newBlock = createBlock(mainchain, uncles, txs, minimumGasPrice, extraData);
 
         removePendingTransactions(txsToRemove);
         executor.executeAndFill(newBlock, newBlockParent.getHeader());
@@ -171,24 +174,25 @@ public class BlockToMineBuilder {
     }
 
     private Block createBlock(
-            Block newBlockParent,
+            List<Block> mainchain,
             List<BlockHeader> uncles,
             List<Transaction> txs,
             Coin minimumGasPrice,
             byte[] extraData) {
-        final BlockHeader newHeader = createHeader(newBlockParent, uncles, txs, minimumGasPrice, extraData);
+        final BlockHeader newHeader = createHeader(mainchain, uncles, txs, minimumGasPrice, extraData);
         final Block newBlock = new Block(newHeader, txs, uncles);
         return validationRules.isValid(newBlock) ? newBlock : new Block(newHeader, txs, Collections.emptyList());
     }
 
     private BlockHeader createHeader(
-            Block newBlockParent,
+            List<Block> mainchain,
             List<BlockHeader> uncles,
             List<Transaction> txs,
             Coin minimumGasPrice,
             byte[] extraData) {
         final byte[] unclesListHash = HashUtil.keccak256(BlockHeader.getUnclesEncodedEx(uncles));
 
+        Block newBlockParent = mainchain.get(0);
         final long timestampSeconds = clock.calculateTimestampForChild(newBlockParent);
 
         // Set gas limit before executing block
@@ -199,6 +203,7 @@ public class BlockToMineBuilder {
         boolean forceLimit = miningConfig.getGasLimit().isTargetForced();
         BigInteger gasLimit = gasLimitCalculator.calculateBlockGasLimit(parentGasLimit,
                                                                         gasUsed, minGasLimit, targetGasLimit, forceLimit);
+        byte[] forkDetectionData = forkDetectionDataCalculator.calculate(mainchain);
 
         final BlockHeader newHeader = blockFactory.newHeader(
                 newBlockParent.getHash().getBytes(),
@@ -218,6 +223,7 @@ public class BlockToMineBuilder {
                 new byte[]{},
                 new byte[]{},
                 new byte[]{},
+                forkDetectionData,
                 minimumGasPrice.getBytes(),
                 uncles.size()
         );

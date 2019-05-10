@@ -488,7 +488,7 @@ public class BlockValidatorTest {
                         null, Block.getTxTrie(null).getHash().getBytes(), null,
                         null, TEST_DIFFICULTY.getBytes(), 0,
                         null, 0L, 0L, new byte[]{}, Coin.ZERO,
-                        null, null, null, Coin.valueOf(10).getBytes(), 0
+                        null, null, null, null, Coin.valueOf(10).getBytes(), 0
                 ),
                 Collections.emptyList(),
                 Collections.emptyList()
