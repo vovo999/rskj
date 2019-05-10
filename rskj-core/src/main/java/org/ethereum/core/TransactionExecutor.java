@@ -265,7 +265,7 @@ public class TransactionExecutor {
         // if targetAddress size is greater than 32 bytes.
         // But init() will detect this earlier
         BlockchainConfig blockchainConfig = netConfig.getConfigForBlock(executionBlock.getNumber());
-        precompiledContract = precompiledContracts.getContractForAddress(blockchainConfig, DataWord.valueOf(targetAddress.getBytes()));
+        precompiledContract = precompiledContracts.getContractForAddress(DataWord.valueOf(targetAddress.getBytes()));
 
         if (precompiledContract != null) {
             Metric metric = profiler.start(Profiler.PROFILING_TYPE.PRECOMPILED_CONTRACT_INIT);

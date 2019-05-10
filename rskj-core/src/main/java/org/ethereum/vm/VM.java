@@ -771,7 +771,7 @@ public class VM {
             codeLength = DataWord.valueOf(program.getCodeAt(address).length);
             BlockchainConfig blockchainConfig = program.getBlockchainConfig();
             if (blockchainConfig.isRskip90()) {
-                PrecompiledContracts.PrecompiledContract precompiledContract = precompiledContracts.getContractForAddress(blockchainConfig, address);
+                PrecompiledContracts.PrecompiledContract precompiledContract = precompiledContracts.getContractForAddress(address);
                 if (precompiledContract != null) {
                     codeLength = DataWord.valueOf(BigIntegers.asUnsignedByteArray(DataWord.MAX_VALUE));
                 }
@@ -1462,7 +1462,7 @@ public class VM {
 
     private void callToAddress(DataWord codeAddress, MessageCall msg) {
         BlockchainConfig blockchainConfig = program.getBlockchainConfig();
-        PrecompiledContracts.PrecompiledContract contract = precompiledContracts.getContractForAddress(blockchainConfig, codeAddress);
+        PrecompiledContracts.PrecompiledContract contract = precompiledContracts.getContractForAddress(codeAddress);
 
         if (contract != null) {
             program.callToPrecompiledAddress(msg, contract);
