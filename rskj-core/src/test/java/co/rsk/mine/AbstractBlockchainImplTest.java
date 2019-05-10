@@ -21,6 +21,7 @@ package co.rsk.mine;
 import co.rsk.crypto.Keccak256;
 import org.ethereum.core.Block;
 import org.ethereum.core.Blockchain;
+import org.ethereum.facade.Ethereum;
 import org.junit.Test;
 
 import java.security.NoSuchAlgorithmException;
@@ -39,7 +40,10 @@ public class AbstractBlockchainImplTest {
     @Test
     public void creationIsCorrect() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                realBlockchain,
+                448);
 
         List<Block> result = testBlockchain.get();
 
@@ -60,7 +64,10 @@ public class AbstractBlockchainImplTest {
 
     @Test
     public void createWithLessBlocksThanMaxHeight() {
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(createBlockchain(10), 11);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                createBlockchain(10),
+                11);
 
         List<Block> result = testBlockchain.get();
 
@@ -70,7 +77,10 @@ public class AbstractBlockchainImplTest {
 
     @Test
     public void createWithBlocksEqualToMaxHeight() {
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(createBlockchain(4), 4);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                createBlockchain(4),
+                4);
 
         List<Block> result = testBlockchain.get();
 
@@ -80,7 +90,10 @@ public class AbstractBlockchainImplTest {
 
     @Test
     public void createWithMoreBlocksThanMaxHeight() {
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(createBlockchain(42), 6);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                createBlockchain(42),
+                6);
 
         List<Block> result = testBlockchain.get();
 
@@ -96,7 +109,10 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addBlockToTheTipOfTheBlockchainGettingOverMaxHeight() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 3);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                realBlockchain,
+                3);
 
         Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
         testBlockchain.addBestBlock(newBestBlockD);
@@ -117,7 +133,10 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addBlockToTheTipOfTheBlockchain() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                realBlockchain,
+                448);
 
         Block newBestBlockD = createBlock(3, realBlockchain.getBestBlock().getHash());
         testBlockchain.addBestBlock(newBestBlockD);
@@ -137,7 +156,10 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addNewBestBlockAtLowerHeight() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                realBlockchain,
+                448);
 
         Block newBestBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
         testBlockchain.addBestBlock(newBestBlockB);
@@ -157,7 +179,10 @@ public class AbstractBlockchainImplTest {
     @Test
     public void addNewBestBlockAndItsBranchToTheTipOfTheBlockchain() {
         Blockchain realBlockchain = createBlockchain(3);
-        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(realBlockchain, 448);
+        AbstractBlockchainImpl testBlockchain = new AbstractBlockchainImpl(
+                mock(Ethereum.class),
+                realBlockchain,
+                448);
 
         Block newBlockB = createBlock(1, realBlockchain.getBlockByNumber(0L).getHash());
         when(realBlockchain.getBlockByHash(newBlockB.getHash().getBytes())).thenReturn(newBlockB);

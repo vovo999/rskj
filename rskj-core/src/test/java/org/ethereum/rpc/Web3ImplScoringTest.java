@@ -354,7 +354,7 @@ public class Web3ImplScoringTest {
 
         World world = new World();
         rsk.blockchain = world.getBlockChain();
-        AbstractBlockchain blockchain = new AbstractBlockchainImpl(world.getBlockChain(), 2);
+        AbstractBlockchain blockchain = new AbstractBlockchainImpl(rsk, world.getBlockChain(), 2);
 
         Wallet wallet = WalletFactory.createWallet();
         TestSystemProperties config = new TestSystemProperties();

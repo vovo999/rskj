@@ -70,6 +70,11 @@ public class CompositeEthereumListener implements EthereumListener {
     }
 
     @Override
+    public void onStatusChange(Block block) {
+        scheduleListenerCallbacks(listener -> listener.onStatusChange(block));
+    }
+
+    @Override
     public void onRecvMessage(Channel channel, Message message) {
         scheduleListenerCallbacks(listener -> listener.onRecvMessage(channel, message));
     }

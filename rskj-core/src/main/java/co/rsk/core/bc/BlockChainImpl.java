@@ -351,6 +351,8 @@ public class BlockChainImpl implements Blockchain {
             blockStore.saveBlock(block, totalDifficulty, true);
             Keccak256 root = stateRootHandler.translate(block.getHeader());
             repository.syncToRoot(root.getBytes());
+            logger.trace("Start onStatusChange");
+            onStatusChange(block);
         }
     }
 
@@ -493,6 +495,12 @@ public class BlockChainImpl implements Blockchain {
     private void onBestBlock(Block block, BlockResult result) {
         if (result != null && listener != null){
             listener.onBestBlock(block, result.getTransactionReceipts());
+        }
+    }
+
+    private void onStatusChange(Block block) {
+        if (listener != null){
+            listener.onStatusChange(block);
         }
     }
 

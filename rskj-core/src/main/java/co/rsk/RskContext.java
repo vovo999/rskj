@@ -227,7 +227,9 @@ public class RskContext implements NodeBootstrapper {
 
     public AbstractBlockchain getMiningBlockchain() {
         if (miningBlockchain == null) {
-            miningBlockchain = new AbstractBlockchainImpl(getBlockchain(), 449);
+            miningBlockchain = new AbstractBlockchainImpl(getRsk(),
+                    getBlockchain(),
+                    449);
         }
 
         return miningBlockchain;

@@ -66,6 +66,8 @@ import java.math.BigInteger;
 import java.time.Clock;
 import java.util.HashMap;
 
+import static org.mockito.Mockito.mock;
+
 public class TransactionModuleTest {
     private final TestSystemProperties config = new TestSystemProperties();
     private final BlockFactory blockFactory = new BlockFactory(config.getBlockchainConfig());
@@ -127,7 +129,7 @@ public class TransactionModuleTest {
         World world = new World(receiptStore);
         BlockChainImpl blockchain = world.getBlockChain();
 
-        AbstractBlockchain miningBlockchain = new AbstractBlockchainImpl(blockchain, 1);
+        AbstractBlockchain miningBlockchain = new AbstractBlockchainImpl(mock(Ethereum.class), blockchain, 1);
 
         Repository repository = blockchain.getRepository();
 
@@ -139,7 +141,9 @@ public class TransactionModuleTest {
 
         for (int i = 1; i < 100; i++) {
             String tx = sendTransaction(web3, repository);
-            //TODO(mmedina): change this once mining blockchain has its own on best block listener
+            // The goal of this test is transaction testing and not block mining testing
+            // Hence, there is no setup for listeners and best blocks must be added manually
+            // to mainchain view object that is used by miner server to build new blocks.
             miningBlockchain.addBestBlock(blockchain.getBestBlock());
             Transaction txInBlock = getTransactionFromBlockWhichWasSend(blockchain, tx);
 
@@ -261,7 +265,7 @@ public class TransactionModuleTest {
                                        BlockStore blockStore,
                                        boolean mineInstant) {
         return createEnvironment(blockchain,
-                new AbstractBlockchainImpl(blockchain, 1),
+                new AbstractBlockchainImpl(mock(Ethereum.class), blockchain, 1),
                 receiptStore,
                 repository,
                 transactionPool,

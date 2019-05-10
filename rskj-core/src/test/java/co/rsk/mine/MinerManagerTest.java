@@ -104,9 +104,6 @@ public class MinerManagerTest {
 
             Assert.assertTrue(minerClient.mineBlock());
 
-            //TODO(mmedina): change this once mining blockchain has its own on best block listener
-            miningBlockchain.addBestBlock(blockchain.getBestBlock());
-
             minerServer.buildBlockToMine( false);
             refreshWork.run();
             Assert.assertTrue(minerClient.mineBlock());
@@ -241,8 +238,6 @@ public class MinerManagerTest {
         Assert.assertEquals(0, blockchain.getBestBlock().getNumber());
 
         manager.mineBlock(blockchain, minerClient, minerServer);
-        //TODO(mmedina): change this once mining blockchain has its own on best block listener
-        miningBlockchain.addBestBlock(blockchain.getBestBlock());
         manager.mineBlock(blockchain, minerClient, minerServer);
         Assert.assertEquals(2, blockchain.getBestBlock().getNumber());
 

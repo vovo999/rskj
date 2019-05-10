@@ -21,6 +21,7 @@ package co.rsk.mine;
 import co.rsk.crypto.Keccak256;
 import org.ethereum.core.Block;
 import org.ethereum.core.Blockchain;
+import org.ethereum.facade.Ethereum;
 
 import javax.annotation.concurrent.GuardedBy;
 import java.util.*;
@@ -42,12 +43,16 @@ public class AbstractBlockchainImpl implements AbstractBlockchain {
     @GuardedBy("internalBlockStoreReadWriteLock")
     private List<Block> blockchain;
 
-    public AbstractBlockchainImpl(Blockchain realBlockchain, int height) {
+    public AbstractBlockchainImpl(Ethereum listeners,
+                                  Blockchain realBlockchain,
+                                  int height) {
         this.height = height;
         this.realBlockchain = realBlockchain;
         this.blocksByHash = new ConcurrentHashMap<>();
         this.blocksByNumber = new ConcurrentHashMap<>();
         fillInternalsBlockStore(realBlockchain.getBestBlock());
+
+        listeners.addListener(new MainchainViewListener(this));
     }
 
     @Override

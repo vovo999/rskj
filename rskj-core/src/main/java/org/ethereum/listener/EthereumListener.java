@@ -49,6 +49,8 @@ public interface EthereumListener {
 
     void onBestBlock(Block block, List<TransactionReceipt> receipts);
 
+    void onStatusChange(Block block);
+
     void onPeerDisconnect(String host, long port);
 
     void onPendingTransactionsReceived(List<Transaction> transactions);
