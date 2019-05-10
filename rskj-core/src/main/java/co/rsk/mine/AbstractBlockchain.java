@@ -18,7 +18,6 @@
 
 package co.rsk.mine;
 
-import co.rsk.crypto.Keccak256;
 import org.ethereum.core.Block;
 
 import java.util.List;
