@@ -35,9 +35,11 @@ public class ForkDetectionDataCalculator {
 
     private static final int NUMBER_OF_UNCLES = 32;
 
+    // + 1 because genesis block can't be used since it does not contain a valid BTC header
+    private static final int MIN_MAINCHAIN_SIZE = CPV_SIZE * CPV_JUMP_FACTOR + 1;
+
     public byte[] calculate(List<Block> mainchainBlocks) {
-        // + 1 because genesis block can't be used since it does not contain a valid BTC header
-        if (mainchainBlocks.size() < CPV_SIZE * CPV_JUMP_FACTOR + 1) {
+        if (mainchainBlocks.size() < MIN_MAINCHAIN_SIZE) {
             return new byte[0];
         }
 
