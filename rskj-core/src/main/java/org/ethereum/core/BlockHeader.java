@@ -501,8 +501,4 @@ public class BlockHeader {
     private boolean shouldForkDetectionDataBeAdded(boolean includeForkDetectionData, byte[] miningForkDetectionData) {
         return includeForkDetectionData && miningForkDetectionData.length > 0;
     }
-
-    private static BigInteger parseBigInteger(byte[] bytes) {
-        return bytes == null ? BigInteger.ZERO : BigIntegers.fromUnsignedByteArray(bytes);
-    }
 }
