@@ -40,6 +40,12 @@ import static org.ethereum.crypto.HashUtil.EMPTY_TRIE_HASH;
 public class BlockFactory {
     private final BlockchainNetConfig blockchainConfig;
 
+    private static final int RLP_HEADER_SIZE = 16;
+
+    private static final int RLP_HEADER_SIZE_WITH_MERGED_MINING = 19;
+
+    private static final int RLP_HEADER_SIZE_WITH_MERGED_MINING_AND_FORK_DATA = 20;
+
     public BlockFactory(BlockchainNetConfig blockchainConfig) {
         this.blockchainConfig = blockchainConfig;
     }
@@ -126,7 +132,9 @@ public class BlockFactory {
 
     public BlockHeader decodeHeader(RLPList rlpHeader, boolean sealed) {
         // TODO fix old tests that have other sizes
-        if (rlpHeader.size() != 20 && rlpHeader.size() != 19 && rlpHeader.size() != 16) {
+        if (rlpHeader.size() != RLP_HEADER_SIZE_WITH_MERGED_MINING_AND_FORK_DATA &&
+                rlpHeader.size() != RLP_HEADER_SIZE_WITH_MERGED_MINING &&
+                rlpHeader.size() != RLP_HEADER_SIZE) {
             throw new IllegalArgumentException(String.format(
                     "A block header must have 16 elements or 19/20 including merged-mining fields but it had %d",
                     rlpHeader.size()
@@ -170,11 +178,13 @@ public class BlockFactory {
         Coin paidFees = RLP.parseCoin(rlpHeader.get(13).getRLPData());
         Coin minimumGasPrice = RLP.parseSignedCoinNonNullZero(rlpHeader.get(14).getRLPData());
 
-        int r = 15;
+        int headerElementsParsed = 15;
 
         int uncleCount = 0;
-        if (rlpHeader.size() == 20 || rlpHeader.size() == 19 || rlpHeader.size() == 16) {
-            byte[] ucBytes = rlpHeader.get(r++).getRLPData();
+        if (rlpHeader.size() == RLP_HEADER_SIZE_WITH_MERGED_MINING_AND_FORK_DATA ||
+                rlpHeader.size() == RLP_HEADER_SIZE_WITH_MERGED_MINING ||
+                rlpHeader.size() == RLP_HEADER_SIZE) {
+            byte[] ucBytes = rlpHeader.get(headerElementsParsed++).getRLPData();
             uncleCount = parseBigInteger(ucBytes).intValueExact();
         }
 
@@ -183,12 +193,12 @@ public class BlockFactory {
         byte[] bitcoinMergedMiningCoinbaseTransaction = null;
         boolean includeForkDetectionData = blockchainConfig.getConfigForBlock(number).isRskip110();
         byte[] miningForkDetectionData = new byte[0];
-        if (rlpHeader.size() > r) {
-            bitcoinMergedMiningHeader = rlpHeader.get(r++).getRLPData();
-            bitcoinMergedMiningMerkleProof = rlpHeader.get(r++).getRLPRawData();
-            bitcoinMergedMiningCoinbaseTransaction = rlpHeader.get(r++).getRLPData();
-            if (includeForkDetectionData && rlpHeader.size() > 19) {
-                miningForkDetectionData = rlpHeader.get(r).getRLPData();
+        if (rlpHeader.size() > headerElementsParsed) {
+            bitcoinMergedMiningHeader = rlpHeader.get(headerElementsParsed++).getRLPData();
+            bitcoinMergedMiningMerkleProof = rlpHeader.get(headerElementsParsed++).getRLPRawData();
+            bitcoinMergedMiningCoinbaseTransaction = rlpHeader.get(headerElementsParsed++).getRLPData();
+            if (includeForkDetectionData && rlpHeader.size() > RLP_HEADER_SIZE_WITH_MERGED_MINING) {
+                miningForkDetectionData = rlpHeader.get(headerElementsParsed).getRLPData();
             }
         }
 
