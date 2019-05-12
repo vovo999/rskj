@@ -121,7 +121,7 @@ public class BlockToMineBuilder {
     }
 
     /**
-     * build creates a block to mine based on the given block as parent.
+     * Creates a new block to mine based on the previous mainchain blocks.
      *
      * @param mainchain last best chain blocks where 0 index is the best block and so on.
      * @param extraData extra data to pass to the block being built.
