@@ -95,14 +95,15 @@ public class BlockFactory {
             byte[] bitcoinMergedMiningCoinbaseTransaction, byte[] mergedMiningForkDetectionData,
             byte[] minimumGasPrice, int uncleCount) {
         boolean useRskip92Encoding = blockchainConfig.getConfigForBlock(number).isRskip92();
-        boolean includeForkDetection = blockchainConfig.getConfigForBlock(number).isRskip110();
+        boolean includeForkDetectionData = blockchainConfig.getConfigForBlock(number).isRskip110();
         return new BlockHeader(
                 parentHash, unclesHash, new RskAddress(coinbase),
                 stateRoot, txTrieRoot, receiptTrieRoot,
                 logsBloom, RLP.parseBlockDifficulty(difficulty), number,
                 gasLimit, gasUsed, timestamp, extraData, paidFees,
                 bitcoinMergedMiningHeader, bitcoinMergedMiningMerkleProof, bitcoinMergedMiningCoinbaseTransaction,
-                RLP.parseSignedCoinNonNullZero(minimumGasPrice), uncleCount, false, useRskip92Encoding
+                mergedMiningForkDetectionData, RLP.parseSignedCoinNonNullZero(minimumGasPrice), uncleCount,
+                false, useRskip92Encoding, includeForkDetectionData
         );
     }
 
@@ -125,9 +126,9 @@ public class BlockFactory {
 
     public BlockHeader decodeHeader(RLPList rlpHeader, boolean sealed) {
         // TODO fix old tests that have other sizes
-        if (rlpHeader.size() != 19 && rlpHeader.size() != 16) {
+        if (rlpHeader.size() != 20 && rlpHeader.size() != 19 && rlpHeader.size() != 16) {
             throw new IllegalArgumentException(String.format(
-                    "A block header must have 16 elements or 19 including merged-mining fields but it had %d",
+                    "A block header must have 16 elements or 19/20 including merged-mining fields but it had %d",
                     rlpHeader.size()
             ));
         }
@@ -172,7 +173,7 @@ public class BlockFactory {
         int r = 15;
 
         int uncleCount = 0;
-        if ((rlpHeader.size() == 19) || (rlpHeader.size() == 16)) {
+        if (rlpHeader.size() == 20 || rlpHeader.size() == 19 || rlpHeader.size() == 16) {
             byte[] ucBytes = rlpHeader.get(r++).getRLPData();
             uncleCount = parseBigInteger(ucBytes).intValueExact();
         }
@@ -180,10 +181,15 @@ public class BlockFactory {
         byte[] bitcoinMergedMiningHeader = null;
         byte[] bitcoinMergedMiningMerkleProof = null;
         byte[] bitcoinMergedMiningCoinbaseTransaction = null;
+        boolean includeForkDetectionData = blockchainConfig.getConfigForBlock(number).isRskip110();
+        byte[] miningForkDetectionData = new byte[0];
         if (rlpHeader.size() > r) {
             bitcoinMergedMiningHeader = rlpHeader.get(r++).getRLPData();
             bitcoinMergedMiningMerkleProof = rlpHeader.get(r++).getRLPRawData();
             bitcoinMergedMiningCoinbaseTransaction = rlpHeader.get(r++).getRLPData();
+            if (includeForkDetectionData && rlpHeader.size() > 19) {
+                miningForkDetectionData = rlpHeader.get(r).getRLPData();
+            }
         }
 
         boolean useRskip92Encoding = blockchainConfig.getConfigForBlock(number).isRskip92();
@@ -191,8 +197,9 @@ public class BlockFactory {
                 parentHash, unclesHash, coinbase, stateRoot,
                 txTrieRoot, receiptTrieRoot, logsBloom, difficulty,
                 number, gasLimit, gasUsed, timestamp, extraData,
-                paidFees, bitcoinMergedMiningHeader, bitcoinMergedMiningMerkleProof, bitcoinMergedMiningCoinbaseTransaction,
-                minimumGasPrice, uncleCount, sealed, useRskip92Encoding
+                paidFees, bitcoinMergedMiningHeader, bitcoinMergedMiningMerkleProof,
+                bitcoinMergedMiningCoinbaseTransaction, miningForkDetectionData,
+                minimumGasPrice, uncleCount, sealed, useRskip92Encoding, includeForkDetectionData
         );
     }
 

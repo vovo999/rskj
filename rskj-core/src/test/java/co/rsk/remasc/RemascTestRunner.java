@@ -289,8 +289,8 @@ class RemascTestRunner {
                     genesis.getStateRoot(), BlockChainImpl.calcTxTrie(txs), HashUtil.EMPTY_TRIE_HASH,
                     new Bloom().getData(), finalDifficulty, parentBlock.getNumber() + 1,
                     parentBlock.getGasLimit(), parentBlock.getGasUsed(), parentBlock.getTimestamp(), new byte[0],
-                    paidFees, null, null, null,
-                    Coin.valueOf(10), uncles.size(), false, true
+                    paidFees, null, null, null, null,
+                    Coin.valueOf(10), uncles.size(), false, true, false
             );
             this.blockHash = blockHash;
         }
