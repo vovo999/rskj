@@ -24,7 +24,6 @@ import co.rsk.crypto.Keccak256;
 import co.rsk.remasc.RemascTransaction;
 import co.rsk.trie.*;
 import org.bouncycastle.util.encoders.Hex;
-import org.ethereum.config.net.MainNetConfig;
 import org.ethereum.core.Block;
 import org.ethereum.core.BlockFactory;
 import org.ethereum.datasource.KeyValueDataSource;
@@ -45,9 +44,9 @@ public class UnitrieComparator {
         int blockNumberToMigrate = 800613;
 
         TrieStore migratedUnitrieStore = new TrieStoreImpl(RskContext.makeDataSource("unitrie-mainnet", unitrieMigratedDatabase));
-        BlockStore unitrieReplayedBlockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), unitrieReplayedDatabase);
+        BlockStore unitrieReplayedBlockStore = RskContext.buildBlockStore(new BlockFactory(null), unitrieReplayedDatabase);
         TrieConverter trieConverter = new TrieConverter();
-        BlockStore orchidBlockStore = RskContext.buildBlockStore(new BlockFactory(new MainNetConfig()), orchidDatabase);
+        BlockStore orchidBlockStore = RskContext.buildBlockStore(new BlockFactory(null), orchidDatabase);
         Block blockToMigrate = orchidBlockStore.getChainBlockByNumber(blockNumberToMigrate);
         UnitrieMigrationTool migrationTool = new UnitrieMigrationTool(
                 blockToMigrate,
