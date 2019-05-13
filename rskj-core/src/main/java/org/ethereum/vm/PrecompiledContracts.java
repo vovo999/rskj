@@ -26,7 +26,8 @@ import co.rsk.core.RskAddress;
 import co.rsk.peg.Bridge;
 import co.rsk.peg.SamplePrecompiledContract;
 import co.rsk.remasc.RemascContract;
-import org.ethereum.config.BlockchainConfig;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
+import org.ethereum.config.blockchain.upgrades.ConsensusRule;
 import org.ethereum.core.Block;
 import org.ethereum.core.Repository;
 import org.ethereum.core.Transaction;
@@ -87,7 +88,7 @@ public class PrecompiledContracts {
     }
 
 
-    public PrecompiledContract getContractForAddress(BlockchainConfig blockchainConfig, DataWord address) {
+    public PrecompiledContract getContractForAddress(ActivationConfig.ForBlock activationConfig, DataWord address) {
 
         if (address == null) {
             return identity;
@@ -105,7 +106,7 @@ public class PrecompiledContracts {
             return identity;
         }
         // RSKIP-93 removes this contract completely
-        if (address.equals(SAMPLE_ADDR_DW) && !blockchainConfig.isRskip93()) {
+        if (address.equals(SAMPLE_ADDR_DW) && !activationConfig.isActive(ConsensusRule.RSKIP93)) {
             return sample;
         }
         if (address.equals(BRIDGE_ADDR_DW)) {

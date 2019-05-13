@@ -28,7 +28,8 @@ import co.rsk.test.builders.TransactionBuilder;
 import co.rsk.vm.BitSet;
 import co.rsk.vm.BytecodeCompiler;
 import org.bouncycastle.util.encoders.Hex;
-import org.ethereum.config.BlockchainConfig;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
+import org.ethereum.config.blockchain.upgrades.ConsensusRule;
 import org.ethereum.core.Account;
 import org.ethereum.core.BlockFactory;
 import org.ethereum.core.Repository;
@@ -3043,15 +3044,15 @@ public class VMTest {
         return getProgram(code, null);
     }
 
-    private BlockchainConfig getBlockchainConfig(boolean preFixStaticCall) {
-        BlockchainConfig blockchainConfig = mock(BlockchainConfig.class);
-        when(blockchainConfig.isRskip91()).thenReturn(true);
+    private ActivationConfig.ForBlock getBlockchainConfig(boolean preFixStaticCall) {
+        ActivationConfig.ForBlock activationConfig = mock(ActivationConfig.ForBlock.class);
+        when(activationConfig.isActive(ConsensusRule.RSKIP91)).thenReturn(true);
 
-        when(blockchainConfig.isRskip103()).thenReturn(!preFixStaticCall);
+        when(activationConfig.isActive(ConsensusRule.RSKIP103)).thenReturn(!preFixStaticCall);
 
-        when(blockchainConfig.isRskip90()).thenReturn(true);
-        when(blockchainConfig.isRskip89()).thenReturn(true);
-        return blockchainConfig;
+        when(activationConfig.isActive(ConsensusRule.RSKIP90)).thenReturn(true);
+        when(activationConfig.isActive(ConsensusRule.RSKIP89)).thenReturn(true);
+        return activationConfig;
     }
 
     private Program getProgram(byte[] code, Transaction transaction) {

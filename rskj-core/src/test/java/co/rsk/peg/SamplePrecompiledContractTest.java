@@ -21,13 +21,14 @@ package co.rsk.peg;
 import co.rsk.config.RskSystemProperties;
 import co.rsk.config.TestSystemProperties;
 import co.rsk.db.RepositoryImpl;
-import org.ethereum.db.TrieStorePoolOnMemory;
 import co.rsk.trie.Trie;
 import org.apache.commons.lang3.StringUtils;
-import org.ethereum.config.BlockchainConfig;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
+import org.ethereum.config.blockchain.upgrades.ConsensusRule;
 import org.ethereum.core.CallTransaction;
 import org.ethereum.core.Repository;
 import org.ethereum.datasource.HashMapDB;
+import org.ethereum.db.TrieStorePoolOnMemory;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.LogInfo;
 import org.ethereum.vm.PrecompiledContracts;
@@ -50,9 +51,9 @@ public class SamplePrecompiledContractTest {
     private final TestSystemProperties config = new TestSystemProperties();
     private final PrecompiledContracts precompiledContracts = new PrecompiledContracts(config);
 
-    private BlockchainConfig getRskIp93ConfigMock(boolean enabled) {
-        BlockchainConfig result = mock(BlockchainConfig.class);
-        when(result.isRskip93()).thenReturn(enabled);
+    private ActivationConfig.ForBlock getRskIp93ConfigMock(boolean enabled) {
+        ActivationConfig.ForBlock result = mock(ActivationConfig.ForBlock.class);
+        when(result.isActive(ConsensusRule.RSKIP93)).thenReturn(enabled);
         return result;
     }
 
