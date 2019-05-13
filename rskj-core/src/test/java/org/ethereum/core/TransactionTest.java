@@ -440,6 +440,8 @@ public class TransactionTest {
                     Block bestBlock = block;
 
                     TransactionExecutor executor = new TransactionExecutor(
+                            config.getNetworkConstants(),
+                            config.getActivationConfig(),
                             txConst,
                             0,
                             bestBlock.getCoinbase(),
@@ -452,7 +454,6 @@ public class TransactionTest {
                             new EthereumListenerAdapter(),
                             0,
                             config.getVmConfig(),
-                            config.getBlockchainConfig(),
                             config.playVM(),
                             config.isRemascEnabled(),
                             config.vmTrace(),
@@ -710,6 +711,8 @@ public class TransactionTest {
     private TransactionExecutor executeTransaction(Blockchain blockchain, Transaction tx) {
         Repository track = blockchain.getRepository().startTracking();
         TransactionExecutor executor = new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 0,
                 RskAddress.nullAddress(),
@@ -722,7 +725,6 @@ public class TransactionTest {
                 new EthereumListenerAdapter(),
                 0,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

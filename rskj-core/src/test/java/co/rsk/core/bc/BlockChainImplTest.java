@@ -858,6 +858,8 @@ public class BlockChainImplTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -870,7 +872,6 @@ public class BlockChainImplTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -918,6 +919,8 @@ public class BlockChainImplTest {
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         StateRootHandler stateRootHandler = new StateRootHandler(config.getActivationConfig(), new HashMapDB(), new HashMap<>());
         return new BlockChainImpl(repository, blockStore, receiptStore, transactionPool, listener, blockValidator, false, 1, new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -930,7 +933,6 @@ public class BlockChainImplTest {
                 listener,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -961,6 +963,8 @@ public class BlockChainImplTest {
     private static BlockExecutor createExecutor(BlockChainImpl blockChain, BlockExecutorTest.SimpleEthereumListener listener) {
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         return new BlockExecutor(blockChain.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -973,7 +977,6 @@ public class BlockChainImplTest {
                 listener,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

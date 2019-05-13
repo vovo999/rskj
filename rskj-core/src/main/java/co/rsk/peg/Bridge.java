@@ -29,7 +29,7 @@ import co.rsk.peg.whitelist.LockWhitelistEntry;
 import co.rsk.peg.whitelist.OneOffWhiteListEntry;
 import com.google.common.annotations.VisibleForTesting;
 import org.bouncycastle.util.encoders.Hex;
-import org.ethereum.config.BlockchainNetConfig;
+import org.ethereum.config.Constants;
 import org.ethereum.config.blockchain.upgrades.ActivationConfig;
 import org.ethereum.config.blockchain.upgrades.ConsensusRule;
 import org.ethereum.core.Block;
@@ -187,10 +187,9 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
     public static final DataWord ADD_SIGNATURE_TOPIC = DataWord.fromString("add_signature_topic");
     public static final DataWord COMMIT_FEDERATION_TOPIC = DataWord.fromString("commit_federation_topic");
 
+    private final Constants constants;
     private final BridgeConstants bridgeConstants;
-
-    private BlockchainNetConfig blockchainNetConfig;
-    private ActivationConfig.ForBlock activationConfig;
+    private final ActivationConfig activationConfig;
 
     private org.ethereum.core.Transaction rskTx;
     private org.ethereum.core.Block rskExecutionBlock;
@@ -199,20 +198,21 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
 
     private BridgeSupport bridgeSupport;
 
-    public Bridge(RskAddress contractAddress, BridgeConstants bridgeConstants, BlockchainNetConfig blockchainNetConfig) {
+    public Bridge(RskAddress contractAddress, Constants constants, ActivationConfig activationConfig) {
         this.contractAddress = contractAddress;
-        this.bridgeConstants = bridgeConstants;
-        this.blockchainNetConfig = blockchainNetConfig;
+        this.constants = constants;
+        this.bridgeConstants = constants.getBridgeConstants();
+        this.activationConfig = activationConfig;
     }
 
     @Override
     public long getGasForData(byte[] data) {
-        if (!activationConfig.isActive(ConsensusRule.RSKIP88) && BridgeUtils.isContractTx(rskTx)) {
+        if (!activationConfig.isActive(ConsensusRule.RSKIP88, rskExecutionBlock.getNumber()) && BridgeUtils.isContractTx(rskTx)) {
             logger.warn("Call from contract before Orchid");
             throw new NullPointerException();
         }
 
-        if (BridgeUtils.isFreeBridgeTx(rskTx, rskExecutionBlock.getNumber(), blockchainNetConfig)) {
+        if (BridgeUtils.isFreeBridgeTx(rskTx, constants, activationConfig.forBlock(rskExecutionBlock.getNumber()))) {
             return 0;
         }
 
@@ -261,7 +261,7 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
             }
         }
 
-        if (!bridgeParsedData.bridgeMethod.isEnabled(this.activationConfig)) {
+        if (!bridgeParsedData.bridgeMethod.isEnabled(this.activationConfig.forBlock(rskExecutionBlock.getNumber()))) {
             logger.warn("'{}' is not enabled to run",bridgeParsedData.bridgeMethod.name());
             return null;
         }
@@ -281,7 +281,6 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
         this.rskExecutionBlock = rskExecutionBlock;
         this.repository = repository;
         this.logs = logs;
-        this.activationConfig = blockchainNetConfig.getConfigForBlock(rskExecutionBlock.getNumber());
     }
 
     @Override
@@ -299,7 +298,7 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
             if (bridgeParsedData == null) {
                 String errorMessage = String.format("Invalid data given: %s.", Hex.toHexString(data));
                 logger.info(errorMessage);
-                if (activationConfig.isActive(ConsensusRule.RSKIP88)) {
+                if (activationConfig.isActive(ConsensusRule.RSKIP88, rskExecutionBlock.getNumber())) {
                     throw new BridgeIllegalArgumentException(errorMessage);
                 }
 
@@ -308,7 +307,7 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
 
             // If this is not a local call, then first check whether the function
             // allows for non-local calls
-            if (activationConfig.isActive(ConsensusRule.RSKIP88) && !isLocalCall() && bridgeParsedData.bridgeMethod.onlyAllowsLocalCalls()) {
+            if (activationConfig.isActive(ConsensusRule.RSKIP88, rskExecutionBlock.getNumber()) && !isLocalCall() && bridgeParsedData.bridgeMethod.onlyAllowsLocalCalls()) {
                 String errorMessage = String.format("Non-local-call to %s. Returning without execution.", bridgeParsedData.bridgeMethod.getFunction().name);
                 logger.info(errorMessage);
                 throw new BridgeIllegalArgumentException(errorMessage);
@@ -324,7 +323,7 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
             } catch (BridgeIllegalArgumentException ex) {
                 String errorMessage = String.format("Error executing: %s", bridgeParsedData.bridgeMethod);
                 logger.warn(errorMessage, ex);
-                if (activationConfig.isActive(ConsensusRule.RSKIP88)) {
+                if (activationConfig.isActive(ConsensusRule.RSKIP88, rskExecutionBlock.getNumber())) {
                     throw new BridgeIllegalArgumentException(errorMessage);
                 }
 
@@ -349,7 +348,7 @@ public class Bridge extends PrecompiledContracts.PrecompiledContract {
                         repository,
                         contractAddress,
                         bridgeConstants,
-                        BridgeStorageConfiguration.fromBlockchainConfig(activationConfig)
+                        BridgeStorageConfiguration.fromBlockchainConfig(activationConfig.forBlock(rskExecutionBlock.getNumber()))
                 ),
                 new BridgeEventLoggerImpl(bridgeConstants, logs),
                 repository, rskExecutionBlock, null, null

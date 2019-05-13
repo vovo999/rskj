@@ -79,9 +79,10 @@ public class ReversibleTransactionExecutor {
         );
 
         TransactionExecutor executor = new TransactionExecutor(
+                config.getNetworkConstants(), config.getActivationConfig(),
                 tx, 0, coinbase, repository, blockStore, receiptStore,
                 blockFactory, programInvokeFactory, executionBlock, new EthereumListenerAdapter(), 0, config.getVmConfig(),
-                config.getBlockchainConfig(), config.playVM(), config.isRemascEnabled(), config.vmTrace(), new PrecompiledContracts(config),
+                config.playVM(), config.isRemascEnabled(), config.vmTrace(), new PrecompiledContracts(config),
                 config.databaseDir(), config.vmTraceDir(), config.vmTraceCompressed()
         ).setLocalCall(true);
 

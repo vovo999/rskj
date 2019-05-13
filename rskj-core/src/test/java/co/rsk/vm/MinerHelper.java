@@ -91,6 +91,8 @@ public class MinerHelper {
         for (Transaction tx : block.getTransactionsList()) {
 
             TransactionExecutor executor = new TransactionExecutor(
+                    config.getNetworkConstants(),
+                    config.getActivationConfig(),
                     tx,
                     txindex++,
                     block.getCoinbase(),
@@ -103,7 +105,6 @@ public class MinerHelper {
                     new EthereumListenerAdapter(),
                     totalGasUsed,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),

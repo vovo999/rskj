@@ -110,7 +110,7 @@ public class PrecompiledContracts {
             return sample;
         }
         if (address.equals(BRIDGE_ADDR_DW)) {
-            return new Bridge(BRIDGE_ADDR, config.getNetworkConstants().getBridgeConstants(), config.getBlockchainConfig());
+            return new Bridge(BRIDGE_ADDR, config.getNetworkConstants(), config.getActivationConfig());
         }
         if (address.equals(BIG_INT_MODEXP_ADDR_DW)) {
             return bigIntegerModexp;

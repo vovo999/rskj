@@ -110,6 +110,8 @@ public class ContractRunner {
         Repository track = repository.startTracking();
         RskSystemProperties config = new TestSystemProperties();
         TransactionExecutor executor = new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 transaction,
                 0,
                 RskAddress.nullAddress(),
@@ -122,7 +124,6 @@ public class ContractRunner {
                 new EthereumListenerAdapter(),
                 0,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

@@ -209,6 +209,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -221,7 +223,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -259,6 +260,8 @@ public class BlockExecutorTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -271,7 +274,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -320,6 +322,8 @@ public class BlockExecutorTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -332,7 +336,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -367,6 +370,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -379,7 +384,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -399,6 +403,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -411,7 +417,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -434,6 +439,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -446,7 +453,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -469,6 +475,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -481,7 +489,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -503,6 +510,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -515,7 +524,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -537,6 +545,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -549,7 +559,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -580,6 +589,8 @@ public class BlockExecutorTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -592,7 +603,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -711,6 +721,8 @@ public class BlockExecutorTest {
         Block block = objects.getBlock();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(objects.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -723,7 +735,6 @@ public class BlockExecutorTest {
                 listener,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -808,6 +819,8 @@ public class BlockExecutorTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor executor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -820,7 +833,6 @@ public class BlockExecutorTest {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

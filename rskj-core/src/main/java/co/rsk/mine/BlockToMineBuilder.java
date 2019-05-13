@@ -92,6 +92,8 @@ public class BlockToMineBuilder {
         this.minerUtils = new MinerUtils();
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         this.executor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -104,7 +106,6 @@ public class BlockToMineBuilder {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

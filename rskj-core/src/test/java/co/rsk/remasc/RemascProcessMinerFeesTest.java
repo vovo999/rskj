@@ -124,6 +124,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -136,7 +138,6 @@ public class RemascProcessMinerFeesTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -187,6 +188,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -199,7 +202,6 @@ public class RemascProcessMinerFeesTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -264,6 +266,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -276,7 +280,6 @@ public class RemascProcessMinerFeesTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -383,6 +386,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                        config.getNetworkConstants(),
+                        config.getActivationConfig(),
                         tx,
                         txindex,
                         block.getCoinbase(),
@@ -395,7 +400,6 @@ public class RemascProcessMinerFeesTest {
                         null,
                         totalGasUsed,
                         config.getVmConfig(),
-                        config.getBlockchainConfig(),
                         config.playVM(),
                         config.isRemascEnabled(),
                         config.vmTrace(),
@@ -519,6 +523,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -531,7 +537,6 @@ public class RemascProcessMinerFeesTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -615,6 +620,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                        config.getNetworkConstants(),
+                        config.getActivationConfig(),
                         tx,
                         txindex,
                         block.getCoinbase(),
@@ -627,7 +634,6 @@ public class RemascProcessMinerFeesTest {
                         null,
                         totalGasUsed,
                         config.getVmConfig(),
-                        config.getBlockchainConfig(),
                         config.playVM(),
                         config.isRemascEnabled(),
                         config.vmTrace(),
@@ -719,6 +725,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -731,7 +739,6 @@ public class RemascProcessMinerFeesTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -803,6 +810,8 @@ public class RemascProcessMinerFeesTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -815,7 +824,6 @@ public class RemascProcessMinerFeesTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

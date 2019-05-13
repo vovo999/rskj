@@ -235,6 +235,8 @@ public class TransactionTest {
                     Block bestBlock = block;
 
                     TransactionExecutor executor = new TransactionExecutor(
+                            config.getNetworkConstants(),
+                            config.getActivationConfig(),
                             txConst,
                             0,
                             bestBlock.getCoinbase(),
@@ -247,7 +249,6 @@ public class TransactionTest {
                             new EthereumListenerAdapter(),
                             0,
                             config.getVmConfig(),
-                            config.getBlockchainConfig(),
                             config.playVM(),
                             config.isRemascEnabled(),
                             config.vmTrace(),

@@ -668,6 +668,8 @@ public class SyncProcessorTest {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(blockchain.getRepository(), (tx1, txindex, coinbase, repository, block1, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex,
                 block1.getCoinbase(),
@@ -680,7 +682,6 @@ public class SyncProcessorTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

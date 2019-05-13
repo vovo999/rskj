@@ -77,6 +77,8 @@ public class ImportLightTest {
                 false,
                 1,
                 new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                        config.getNetworkConstants(),
+                        config.getActivationConfig(),
                         tx1,
                         txindex1,
                         block1.getCoinbase(),
@@ -89,7 +91,6 @@ public class ImportLightTest {
                         listener,
                         totalGasUsed1,
                         config.getVmConfig(),
-                        config.getBlockchainConfig(),
                         config.playVM(),
                         config.isRemascEnabled(),
                         config.vmTrace(),

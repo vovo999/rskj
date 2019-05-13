@@ -425,6 +425,8 @@ public class RemascStorageProviderTest {
         BlockFactory blockFactory = new BlockFactory(config.getActivationConfig());
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockExecutor blockExecutor = new BlockExecutor(repository, (tx, txindex, coinbase1, track, block, totalGasUsed) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 txindex,
                 block.getCoinbase(),
@@ -437,7 +439,6 @@ public class RemascStorageProviderTest {
                 null,
                 totalGasUsed,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

@@ -69,6 +69,8 @@ public class RskTestFactory extends RskTestContext {
         if (transactionExecutorFactory == null) {
             RskSystemProperties config = getRskSystemProperties();
             transactionExecutorFactory = (tx, txindex, coinbase, track, block, totalGasUsed) -> new TransactionExecutor(
+                    config.getNetworkConstants(),
+                    config.getActivationConfig(),
                     tx,
                     txindex,
                     block.getCoinbase(),
@@ -81,7 +83,6 @@ public class RskTestFactory extends RskTestContext {
                     getCompositeEthereumListener(),
                     totalGasUsed,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),
@@ -104,7 +105,7 @@ public class RskTestFactory extends RskTestContext {
     }
 
     public static Genesis getGenesisInstance(RskSystemProperties config) {
-        boolean useRskip92Encoding = config.getBlockchainConfig().getConfigForBlock(0).isActive(ConsensusRule.RSKIP92);
+        boolean useRskip92Encoding = config.getActivationConfig().isActive(ConsensusRule.RSKIP92, 0L);
         return GenesisLoader.loadGenesis(config.genesisInfo(), config.getNetworkConstants().getInitialNonce(), false, useRskip92Encoding);
     }
 }

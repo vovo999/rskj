@@ -162,6 +162,8 @@ public class BlockChainBuilder {
 
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         BlockChainImpl blockChain = new BlockChainImpl(this.repository, this.blockStore, receiptStore, transactionPool, listener, blockValidator, false, 1, new BlockExecutor(this.repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -174,7 +176,6 @@ public class BlockChainBuilder {
                 listener,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),
@@ -208,6 +209,8 @@ public class BlockChainBuilder {
         if (this.blocks != null) {
             final ProgramInvokeFactoryImpl programInvokeFactory1 = new ProgramInvokeFactoryImpl();
             BlockExecutor blockExecutor = new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                    config.getNetworkConstants(),
+                    config.getActivationConfig(),
                     tx1,
                     txindex1,
                     block1.getCoinbase(),
@@ -220,7 +223,6 @@ public class BlockChainBuilder {
                     listener,
                     totalGasUsed1,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),

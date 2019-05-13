@@ -75,7 +75,7 @@ public abstract class NativeContract extends PrecompiledContracts.PrecompiledCon
         super.init(tx, executionBlock, repository, blockStore, receiptStore, logs);
 
         executionEnvironment = new ExecutionEnvironment(
-                config.getBlockchainConfig(),
+                config.getActivationConfig(),
                 tx,
                 executionBlock,
                 repository,

@@ -94,6 +94,8 @@ public class StateTestRunner {
         Repository track = repository.startTracking();
 
         TransactionExecutor executor = new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 transaction,
                 0,
                 new RskAddress(env.getCurrentCoinbase()),
@@ -106,7 +108,6 @@ public class StateTestRunner {
                 new EthereumListenerAdapter(),
                 0,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled() && stateTestUseREMASC,
                 config.vmTrace(),
@@ -142,6 +143,8 @@ public class StateTestRunner {
         final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         StateRootHandler stateRootHandler = new StateRootHandler(config.getActivationConfig(), new HashMapDB(), new HashMap<>());
         blockchain = new BlockChainImpl(repository, blockStore, null, null, null, null, false, 1, new BlockExecutor(repository, (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx1,
                 txindex1,
                 block1.getCoinbase(),
@@ -154,7 +157,6 @@ public class StateTestRunner {
                 null,
                 totalGasUsed1,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

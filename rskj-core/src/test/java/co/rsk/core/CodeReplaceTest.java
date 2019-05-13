@@ -212,6 +212,8 @@ public class CodeReplaceTest {
     public TransactionExecutor executeTransaction(BlockChainImpl blockchain, Transaction tx) {
         Repository track = blockchain.getRepository().startTracking();
         TransactionExecutor executor = new TransactionExecutor(
+                config.getNetworkConstants(),
+                config.getActivationConfig(),
                 tx,
                 0,
                 RskAddress.nullAddress(),
@@ -224,7 +226,6 @@ public class CodeReplaceTest {
                 new EthereumListenerAdapter(),
                 0,
                 config.getVmConfig(),
-                config.getBlockchainConfig(),
                 config.playVM(),
                 config.isRemascEnabled(),
                 config.vmTrace(),

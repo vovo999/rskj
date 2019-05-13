@@ -67,6 +67,8 @@ public class CallContractTest {
 
         try {
             org.ethereum.core.TransactionExecutor executor = new TransactionExecutor(
+                    config.getNetworkConstants(),
+                    config.getActivationConfig(),
                     tx,
                     0,
                     bestBlock.getCoinbase(),
@@ -79,7 +81,6 @@ public class CallContractTest {
                     new EthereumListenerAdapter(),
                     0,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),

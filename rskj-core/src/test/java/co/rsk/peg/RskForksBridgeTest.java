@@ -334,10 +334,14 @@ public class RskForksBridgeTest {
                 Long.MAX_VALUE,
                 PrecompiledContracts.BRIDGE_ADDR,
                 0,
-                Bridge.GET_STATE_FOR_DEBUGGING.encode(new Object[]{}), beforeBambooProperties.getBlockchainConfig().getCommonConstants().getChainId());
+                Bridge.GET_STATE_FOR_DEBUGGING.encode(new Object[]{}),
+                beforeBambooProperties.getNetworkConstants().getChainId()
+        );
         rskTx.sign(new byte[32]);
 
         TransactionExecutor executor = new TransactionExecutor(
+                beforeBambooProperties.getNetworkConstants(),
+                beforeBambooProperties.getActivationConfig(),
                 rskTx,
                 0,
                 blockChain.getBestBlock().getCoinbase(),
@@ -350,7 +354,6 @@ public class RskForksBridgeTest {
                 new EthereumListenerAdapter(),
                 0,
                 beforeBambooProperties.getVmConfig(),
-                beforeBambooProperties.getBlockchainConfig(),
                 beforeBambooProperties.playVM(),
                 beforeBambooProperties.isRemascEnabled(),
                 beforeBambooProperties.vmTrace(),
@@ -369,7 +372,7 @@ public class RskForksBridgeTest {
 
         Object[] result = Bridge.GET_STATE_FOR_DEBUGGING.decodeResult(res.getHReturn());
 
-        return BridgeState.create(beforeBambooProperties.getBlockchainConfig().getCommonConstants().getBridgeConstants(), (byte[])result[0]);
+        return BridgeState.create(beforeBambooProperties.getNetworkConstants().getBridgeConstants(), (byte[])result[0]);
     }
 
 

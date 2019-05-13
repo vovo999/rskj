@@ -25,6 +25,8 @@ import co.rsk.net.TransactionValidationResult;
 import co.rsk.net.handler.TxPendingValidator;
 import co.rsk.trie.Trie;
 import com.google.common.annotations.VisibleForTesting;
+import org.ethereum.config.Constants;
+import org.ethereum.config.blockchain.upgrades.ActivationConfig;
 import org.ethereum.core.*;
 import org.ethereum.crypto.HashUtil;
 import org.ethereum.db.BlockStore;
@@ -61,6 +63,8 @@ public class TransactionPoolImpl implements TransactionPool {
     private final Map<Keccak256, Long> transactionTimes = new HashMap<>();
 
     private final RskSystemProperties config;
+    private final Constants constants;
+    private final ActivationConfig activationConfig;
     private final BlockStore blockStore;
     private final Repository repository;
     private final ReceiptStore receiptStore;
@@ -87,6 +91,8 @@ public class TransactionPoolImpl implements TransactionPool {
                                int outdatedThreshold,
                                int outdatedTimeout) {
         this.config = config;
+        this.constants = config.getNetworkConstants();
+        this.activationConfig = config.getActivationConfig();
         this.blockStore = blockStore;
         this.repository = repository;
         this.receiptStore = receiptStore;
@@ -96,7 +102,7 @@ public class TransactionPoolImpl implements TransactionPool {
         this.outdatedThreshold = outdatedThreshold;
         this.outdatedTimeout = outdatedTimeout;
 
-        this.validator = new TxPendingValidator(config.getBlockchainConfig());
+        this.validator = new TxPendingValidator(config.getNetworkConstants(), config.getActivationConfig());
 
         if (this.outdatedTimeout > 0) {
             this.cleanerTimer = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "TransactionPoolCleanerTimer"));
@@ -139,6 +145,8 @@ public class TransactionPoolImpl implements TransactionPool {
             new TransactionSet(pendingTransactions),
             (repository, tx) ->
                 new TransactionExecutor(
+                    constants,
+                    activationConfig,
                     tx,
                     0,
                     bestBlock.getCoinbase(),
@@ -151,7 +159,6 @@ public class TransactionPoolImpl implements TransactionPool {
                     new EthereumListenerAdapter(),
                     0,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),
@@ -463,7 +470,7 @@ public class TransactionPoolImpl implements TransactionPool {
 
     private Coin getTxBaseCost(Transaction tx) {
         Coin gasCost = tx.getValue();
-        if (bestBlock == null || tx.transactionCost(bestBlock.getNumber(), config.getBlockchainConfig()) > 0) {
+        if (bestBlock == null || tx.transactionCost(constants, activationConfig.forBlock(bestBlock.getNumber())) > 0) {
             BigInteger gasLimit = new BigInteger(1, tx.getGasLimit());
             gasCost = gasCost.add(tx.getGasPrice().multiply(gasLimit));
         }

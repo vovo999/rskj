@@ -106,6 +106,8 @@ public class BlockBuilder {
             final ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
             final TestSystemProperties config = new TestSystemProperties();
             BlockExecutor executor = new BlockExecutor(blockChain.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                    config.getNetworkConstants(),
+                    config.getActivationConfig(),
                     tx1,
                     txindex1,
                     block1.getCoinbase(),
@@ -118,7 +120,6 @@ public class BlockBuilder {
                     null,
                     totalGasUsed1,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),

@@ -91,6 +91,8 @@ public class World {
         final TestSystemProperties config = new TestSystemProperties();
         if (this.blockExecutor == null) {
             this.blockExecutor = new BlockExecutor(this.getRepository(), (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                    config.getNetworkConstants(),
+                    config.getActivationConfig(),
                     tx1,
                     txindex1,
                     block1.getCoinbase(),
@@ -103,7 +105,6 @@ public class World {
                     null,
                     totalGasUsed1,
                     config.getVmConfig(),
-                    config.getBlockchainConfig(),
                     config.playVM(),
                     config.isRemascEnabled(),
                     config.vmTrace(),

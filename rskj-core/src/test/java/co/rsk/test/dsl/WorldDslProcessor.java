@@ -238,6 +238,8 @@ public class WorldDslProcessor {
             final TestSystemProperties config = new TestSystemProperties();
             BlockExecutor executor = new BlockExecutor(world.getRepository(),
                     (tx1, txindex1, coinbase, track1, block1, totalGasUsed1) -> new TransactionExecutor(
+                                                               config.getNetworkConstants(),
+                                                               config.getActivationConfig(),
                                                                tx1,
                                                                txindex1,
                                                                block1.getCoinbase(),
@@ -250,7 +252,6 @@ public class WorldDslProcessor {
                     null,
                                                                totalGasUsed1,
                                                                config.getVmConfig(),
-                                                               config.getBlockchainConfig(),
                                                                config.playVM(),
                                                                config.isRemascEnabled(),
                                                                config.vmTrace(),
