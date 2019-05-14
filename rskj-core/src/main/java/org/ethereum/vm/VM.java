@@ -1378,7 +1378,7 @@ public class VM {
     }
 
     protected void doCREATE2(){
-        if (program.isStaticCall()) throw Program.ExceptionHelper.modificationException();
+        if (program.isStaticCall()) {throw Program.ExceptionHelper.modificationException();}
 
         if (computeGas){
             Long codeSize = stack.get(stack.size() - 3).longValueSafe();
@@ -1393,11 +1393,12 @@ public class VM {
         DataWord inSize = program.stackPop();
         DataWord salt = program.stackPop();
 
-        if (logger.isInfoEnabled())
+        if (logger.isInfoEnabled()) {
             logger.info(logString, String.format("%5s", "[" + program.getPC() + "]"),
                     String.format("%-12s", op.name()),
                     program.getRemainingGas(),
                     program.getCallDeep(), hint);
+        }
 
         program.createContract2(value, inOffset, inSize, salt);
 

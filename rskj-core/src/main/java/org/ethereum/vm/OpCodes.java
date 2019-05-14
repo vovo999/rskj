@@ -618,7 +618,7 @@ public class OpCodes {
     /**
      * (0xf5) Skinny CREATE2, same as CREATE but with deterministic address
      */
-    static final byte OP_CREATE2 =(byte)0xf5;
+    public static final byte OP_CREATE2 =(byte)0xf5;
 
     /**
      *  opcode that can be used to call another contract (or itself) while disallowing any
