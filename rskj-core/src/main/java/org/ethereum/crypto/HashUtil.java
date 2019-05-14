@@ -19,6 +19,7 @@
 
 package org.ethereum.crypto;
 
+import co.rsk.core.RskAddress;
 import org.ethereum.crypto.cryptohash.Keccak256;
 import org.ethereum.util.RLP;
 import org.ethereum.util.Utils;
@@ -114,6 +115,30 @@ public class HashUtil {
         byte[] encNonce = RLP.encodeBigInteger(new BigInteger(1, nonce));
 
         return sha3omit12(RLP.encodeList(encSender, encNonce));
+    }
+
+    /**
+     * The way to calculate new address inside ethereum for {@link org.ethereum.vm.OpCode#CREATE2}
+     * sha3(0xff ++ msg.sender ++ salt ++ sha3(init_code)))[12:]
+     *
+     * @param senderAddr - creating address
+     * @param initCode - contract init code
+     * @param salt - salt to make different result addresses
+     * @return new address
+     */
+    public static byte[] calcSaltAddr(RskAddress senderAddr, byte[] initCode, byte[] salt) {
+        // 1 - 0xff length, 32 bytes - keccak-256
+        byte[] data = new byte[1 + senderAddr.length() + salt.length + 32];
+        data[0] = (byte) 0xff;
+        int currentOffset = 1;
+        System.arraycopy(senderAddr.getBytes(), 0, data, currentOffset, senderAddr.length());
+        currentOffset += senderAddr.length();
+        System.arraycopy(salt, 0, data, currentOffset, salt.length);
+        currentOffset += salt.length;
+        byte[] sha3InitCode = keccak256(initCode);
+        System.arraycopy(sha3InitCode, 0, data, currentOffset, sha3InitCode.length);
+
+        return sha3omit12(data);
     }
 
     /**

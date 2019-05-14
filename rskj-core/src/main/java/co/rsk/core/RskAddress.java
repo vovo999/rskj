@@ -116,4 +116,8 @@ public class RskAddress {
     public String toString() {
         return Hex.toHexString(bytes);
     }
+
+    public int length() {
+        return LENGTH_IN_BYTES;
+    }
 }
