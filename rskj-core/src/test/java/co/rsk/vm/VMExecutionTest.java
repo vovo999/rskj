@@ -20,9 +20,16 @@ package co.rsk.vm;
 
 import co.rsk.config.TestSystemProperties;
 import co.rsk.config.VmConfig;
+import co.rsk.core.Coin;
+import co.rsk.core.RskAddress;
+import co.rsk.test.builders.AccountBuilder;
+import co.rsk.test.builders.TransactionBuilder;
+import org.bouncycastle.util.Arrays;
 import org.bouncycastle.util.encoders.Hex;
 import org.ethereum.config.BlockchainConfig;
+import org.ethereum.core.Account;
 import org.ethereum.core.BlockFactory;
+import org.ethereum.core.Transaction;
 import org.ethereum.vm.DataWord;
 import org.ethereum.vm.PrecompiledContracts;
 import org.ethereum.vm.VM;
@@ -35,6 +42,7 @@ import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -655,6 +663,154 @@ public class VMExecutionTest {
         Assert.assertEquals(12, program.getResult().getGasUsed());
     }
 
+    private void callCreate2WithBlockchainConfig(String address, String salt, String pushInitCode, int size, int intOffset, String expected, long gasExpected, BlockchainConfig blockchainConfig) {
+        int value = 10;
+        RskAddress testAddress = new RskAddress(address);
+        invoke.setOwnerAddress(testAddress);
+        invoke.getRepository().addBalance(testAddress, Coin.valueOf(value + 1));
+        String inSize = "0x" + DataWord.valueOf(size);
+        String inOffset = "0x" + DataWord.valueOf(intOffset);
+
+        if (!pushInitCode.isEmpty()) {
+            pushInitCode += " PUSH1 0x00 MSTORE";
+        }
+
+        Program program = executeCodeWithBlockchainConfig(
+                pushInitCode +
+                        " PUSH32 " + salt +
+                        " PUSH32 " + inSize +
+                        " PUSH32 " + inOffset +
+                        " PUSH32 " + "0x" + DataWord.valueOf(value) +
+                        " CREATE2", 8, blockchainConfig);
+        Stack stack = program.getStack();
+        String result = Hex.toHexString(Arrays.copyOfRange(stack.peek().getData(), 12, stack.peek().getData().length));
+
+        Assert.assertEquals(1, stack.size());
+        Assert.assertEquals(expected.toUpperCase(), result.toUpperCase());
+        Assert.assertEquals(gasExpected, program.getResult().getGasUsed());
+    }
+
+    private void callCreate2(String address, String salt, String pushInitCode, int size, int intOffset, String expected, long gasExpected) {
+        BlockchainConfig blockchainConfig = mock(BlockchainConfig.class);
+        when(blockchainConfig.isRskip125()).thenReturn(true);
+        callCreate2WithBlockchainConfig(address, salt, pushInitCode, size, intOffset, expected, gasExpected, blockchainConfig);
+    }
+
+    @Test
+    public void testCREATE2_0() {
+        callCreate2("0x0f6510583d425cfcf94b99f8b073b44f60d1912b",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "PUSH32 " + "0x600b000000000000000000000000000000000000000000000000000000000000",
+                2,
+                0,
+                "3BC3EFA1C487A1EBFC911B47B548E2C82436A212",
+                32033);
+    }
+
+    @Test
+    public void testCREATE2_1() {
+        callCreate2("0x0f6510583d425cfcf94b99f8b073b44f60d1912b",
+                "0x00000000000000000000000000000000000000000000000000000000cafebabe",
+                "PUSH32 0x601b000000000000000000000000000000000000000000000000000000000000",
+                2,
+                0,
+                "19542B03F2D5D4E1910DBE096FAF0842D928883D",
+                32033);
+    }
+
+    @Test
+    public void testCREATE2_2() {
+        callCreate2("0xdeadbeef00000000000000000000000000000000",
+                "0x00000000000000000000000000000000000000000000000000000000cafebabe",
+                "PUSH32 0x601b000000000000000000000000000000000000000000000000000000000000",
+                2,
+                0,
+                "3BA1DC70CC17E740F4BD85052AF074B2B2A49E06",
+                32033);
+    }
+
+    @Test
+    public void testCREATE2_3() {
+        callCreate2("0xdeadbeef00000000000000000000000000000000",
+                "0x00000000000000000000000000000000000000000000000000000000cafebabe",
+                "PUSH32 0x601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b",
+                32,
+                0,
+                "D1FB828980EC250DD0A350E59108ECC63C2C4B36",
+                32078);
+    }
+
+    @Test
+    public void testCREATE2_4() {
+        callCreate2("0x0f6510583d425cfcf94b99f8b073b44f60d1912b",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "PUSH32 0x601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b",
+                0,
+                0,
+                "65BD0714DEFB919BC02F9507D6F9D9CD21195ECC",
+                32024);
+    }
+
+    @Test
+    public void testCREATE2_5() {
+        callCreate2("0x0f6510583d425cfcf94b99f8b073b44f60d1912b",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "PUSH32 0x601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b",
+                10,
+                8,
+                "A992CD9E3E78C0A6BBBB4F06B52B3AD8924B0916",
+                32045);
+    }
+
+    @Test
+    public void testCREATE2_6() {
+        callCreate2("0x0f6510583d425cfcf94b99f8b073b44f60d1912b",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "",
+                12,
+                0,
+                "16F27A604035007FA9925DB8CC2CAFDCFFC6278C",
+                32021);
+    }
+
+    @Test
+    public void testCREATE2_7() {
+        callCreate2("0x0f6510583d425cfcf94b99f8b073b44f60d1912b",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "",
+                0,
+                0,
+                "65BD0714DEFB919BC02F9507D6F9D9CD21195ECC",
+                32012);
+    }
+
+    @Test
+    public void testCREATE2_InvalidInitCode() {
+        // INIT_CODE fails so it returns a ZERO address
+        // as it fails, it spends all the gas
+        callCreate2("0x0000000000000000000000000000000000000000",
+                "0xAE00000000000000000000000000000000000000000000000000000000000000",
+                "PUSH32 0xAE00000000000000000000000000000000000000000000000000000000000000",
+                1,
+                0,
+                "0000000000000000000000000000000000000000",
+                1000000);
+    }
+
+    @Test(expected = Program.IllegalOperationException.class)
+    public void testCREATE2ShouldFailInvalidOpcode() {
+        BlockchainConfig blockchainConfig = mock(BlockchainConfig.class);
+        when(blockchainConfig.isRskip125()).thenReturn(false);
+        callCreate2WithBlockchainConfig("0x0000000000000000000000000000000000000000",
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "PUSH32 0x601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b601b",
+                10,
+                8,
+                "A992CD9E3E78C0A6BBBB4F06B52B3AD8924B0916",
+                32045,
+                blockchainConfig);
+    }
+
     @Test
     public void callDataCopyBasicGasCost() {
         Program program = executeCode(
@@ -680,19 +836,31 @@ public class VMExecutionTest {
         assertEquals(expected, Hex.toHexString(program.getStack().peek().getData()).toUpperCase());
     }
 
+
     private Program executeCodeWithBlockchainConfig(String code, int nsteps, BlockchainConfig blockchainConfig) {
         return executeCodeWithBlockchainConfig(compiler.compile(code), nsteps, blockchainConfig);
     }
 
+
+    private static Transaction createTransaction(int number) {
+        AccountBuilder acbuilder = new AccountBuilder();
+        acbuilder.name("sender" + number);
+        Account sender = acbuilder.build();
+        acbuilder.name("receiver" + number);
+        Account receiver = acbuilder.build();
+        TransactionBuilder txbuilder = new TransactionBuilder();
+        return txbuilder.sender(sender).receiver(receiver).value(BigInteger.valueOf(number * 1000 + 1000)).build();
+    }
+
+
     private Program executeCodeWithBlockchainConfig(byte[] code, int nsteps, BlockchainConfig blockchainConfig) {
         VM vm = new VM(vmConfig, precompiledContracts);
-        Program program = new Program(vmConfig, precompiledContracts, blockFactory, blockchainConfig, code, invoke, null);
+        Program program = new Program(vmConfig, precompiledContracts, blockFactory, blockchainConfig, code, invoke, createTransaction(1) );
 
         for (int k = 0; k < nsteps; k++) {
             vm.step(program);
         }
 
         return program;
-
     }
 }
